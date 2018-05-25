@@ -1,0 +1,16 @@
+.DS_Store
+.eslintrc
+.idea
+
+node_modules
+package-lock.json
+.vscode
+
+.nyc_output
+coverage.lcov
+coverage
+
+*.log
+dist
+lib
+es

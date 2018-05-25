@@ -1,0 +1,27 @@
+{
+  "name": "@cherry-tomato/core",
+  "version": "2.0.0-alpha.1",
+  "description": "",
+  "main": "lib/index.js",
+  "files": [
+    "index.js",
+    "lib"
+  ],
+  "scripts": {
+    "clean": "rm -fr lib",
+    "build": "npm run clean && tsc",
+    "dev": "npm run clean && tsc -w",
+    "test": "mocha --require ts-node/register --noEmit -p test-tsconfig.js --watch-extensions ts",
+    "nyc": "nyc npm run test",
+    "prepare": "npm run build"
+  },
+  "author": "huey.LS",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/mocha": "^5.2.7",
+    "typescript": "^3.6.4",
+    "mocha": "^6.2.2",
+    "nyc": "^14.1.1",
+    "ts-node": "^8.4.1"
+  }
+}

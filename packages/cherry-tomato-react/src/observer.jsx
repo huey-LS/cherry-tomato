@@ -1,0 +1,55 @@
+import * as React from 'react';
+import { Model } from '@cherry-tomato/core';
+
+export default function observer () {
+  return function (Component) {
+    return class CartonsObserverComponent extends React.Component {
+      constructor (props) {
+        super(props);
+
+        this._listeners = {};
+      }
+
+      componentDidMount () {
+        this.observe(this.props);
+      }
+
+      componentWillUnmount () {
+        this.removeListener();
+      }
+
+      componentWillReceiveProps (nextProps) {
+        this.removeListener();
+        this.observe(nextProps);
+      }
+
+      render () {
+        return (
+          <Component
+            {...this.props}
+          />
+        )
+      }
+
+      updateView = () => {
+        this.forceUpdate();
+      }
+
+      observe = (props) => {
+        Object.keys(props).forEach((key) => {
+          if (Model.isModel(props[key])) {
+            this._listeners[key] = props[key].on('modelDidUpdate', this.updateView);
+          }
+        })
+      }
+
+      removeListener () {
+        let listeners = this._listeners;
+        Object.keys(listeners).forEach((key) => {
+          listeners[key]()
+        })
+        this._listeners = {};
+      }
+    }
+  }
+}
