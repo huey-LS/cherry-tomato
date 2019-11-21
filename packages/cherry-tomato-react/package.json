@@ -1,6 +1,6 @@
 {
   "name": "@cherry-tomato/react",
-  "version": "1.0.0-beta.4",
+  "version": "2.0.0-alpha.2",
   "description": "",
   "main": "index.js",
   "files": [
@@ -13,7 +13,11 @@
     "build": "npm run clean && npm run build:commonjs",
     "prepare": "npm run build"
   },
-  "author": "",
+  "author": "huey.LS",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/huey-LS/cherry-tomato"
+  },
   "license": "MIT",
   "devDependencies": {
     "babel": "^6.23.0",
@@ -23,12 +27,12 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-2": "^6.24.1",
-    "cross-env": "^5.1.4"
-  },
-  "dependencies": {
-    "@cherry-tomato/core": "^2.0.0-alpha.1",
-    "react": "^16.3.2",
+    "cross-env": "^5.1.4",
     "tslib": "^1.10.0",
     "typescript": "^3.5.2"
+  },
+  "dependencies": {
+    "@cherry-tomato/core": "^2.0.0-alpha.2",
+    "react": "^16.3.2"
   }
 }

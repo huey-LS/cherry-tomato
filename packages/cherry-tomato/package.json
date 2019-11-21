@@ -1,6 +1,6 @@
 {
   "name": "@cherry-tomato/core",
-  "version": "2.0.0-alpha.1",
+  "version": "2.0.0-alpha.2",
   "description": "",
   "main": "lib/index.js",
   "files": [
@@ -16,12 +16,16 @@
     "prepare": "npm run build"
   },
   "author": "huey.LS",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/huey-LS/cherry-tomato"
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/mocha": "^5.2.7",
-    "typescript": "^3.6.4",
     "mocha": "^6.2.2",
     "nyc": "^14.1.1",
-    "ts-node": "^8.4.1"
+    "ts-node": "^8.4.1",
+    "typescript": "^3.6.4"
   }
 }

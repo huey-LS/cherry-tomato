@@ -1,5 +1,5 @@
 {
-  "lerna": "3.18.2",
+  "lerna": "3.19.0",
   "version": "independent",
   "npmClient": "npm",
   "packages": [

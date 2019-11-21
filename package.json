@@ -11,7 +11,7 @@
   "author": "huey.LS",
   "license": "MIT",
   "devDependencies": {
-    "lerna": "3.18.2",
+    "lerna": "3.19.0",
     "tslib": "^1.10.0",
     "typescript": "^3.6.4"
   }
