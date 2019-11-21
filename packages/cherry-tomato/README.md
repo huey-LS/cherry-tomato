@@ -1,18 +1,24 @@
 # cherry-tomato
 [![npm version](https://img.shields.io/npm/v/@cherry-tomato/core.svg?maxAge=3600)](https://www.npmjs.org/package/@cherry-tomato/core)
 
-# Description
-`cherry-tomato` 是一个使用js做序列化和分序列化的框架，专注于 `js` 的 `model` 层代码
+# 介绍
+`cherry-tomato` 是一个使用js做序列化和分序列化的框架，专注于 `js` 的 `model` 层代码。
 
-# Installation
+`cherry-tomato` 基于 `typescript` 开发，可以提供良好的校验和提示效果。
+
+`cherry-tomato` 是纯粹的 `js` 代码，可以用于各个平台，比如 浏览器和nodejs。
+
+在复杂的应用中，使用`cherry-tomato` 构建完善的 `Model` 可以进一步提高项目代码的可复用性。面向对象的方式也能更好的帮助你理清项目逻辑。
+
+## 安装
 ```
 npm install --save @cherry-tomato/core
 ```
 
-# Documentation
+# API目录
 - [API](#api)
   - [Model](#Model) 基础`Model`类
-  - [Collection](#Collection) 基础`Collection`类，是多个`Model`的组合（类似数组）
+  - [Collection](#Collection) 基础`Collection`类，是多个`Model`的集合（类似数组）
   - [EventEmitter](#EventEmitter) 事件订阅基类，`Model` 事件基于此
   - [KeyCreators](#KeyCreators) 内置的key生成工具
     - [randomCreator](#randomCreator) 随机数key生成
@@ -22,11 +28,11 @@ npm install --save @cherry-tomato/core
   - [output] 用于自动整合数据导出的装饰器
 - [Usage with react](https://github.com/huey-LS/cherry-tomato/tree/master/packages/cherry-tomato-react/README.md)
 
-## API
-### Model
-构建一个自己的model
+## API 介绍
+### Model 模型
+基础模型类， 都继承于这个开发
 
-#### Usage
+#### Usage 用法
 ```js
 import { Model } from '@cherry-tomato/core';
 
@@ -42,19 +48,23 @@ class CustomModel extends Model {
 }
 ```
 
-##### Static Attributes
+##### Static Attributes 静态函数
 - [initialAttributes] {Function} - 建议`Function`
   设置为`Function`时，将会把返回值作为初始化的属性
 - key - key生成函数 默认使用
 
-#### Hooks
+#### Hooks 生命周期
 - modelWillUpdate {Function(prevAttributes, nextAttributes)} - 调用了`set`, 但还没有执行`set` 操作时，此时 `this.get(attributeName) === prevAttributes.get(attributeName)`
 - modelDidUpdate {Function(prevAttributes, nextAttributes)} - 调用了`set`, `set`执行成功, 此时 `this.get(attributeName) === nextAttributes.get(attributeName)`
 
-##### Arguments
+##### Arguments 实例化时的可选参数
 - `[attributes]` 初始化属性 会和 `static initialAttributes`合并
 
-##### Method
+##### Method 内置函数（同时包含 EventEmitter 的内容）
+- `get`
+- `set`
+- `EventEmitter` 所有函数
+
 实例化后可以通过 `get`,`set`对属性进行读写
 ```js
 var m = new CustomModel();
@@ -66,8 +76,8 @@ var m = new CustomModel({ test: 3 });
 m.get('test') // 3
 ```
 
-### Collection
-对`Model`集合的一层包装, 同时会自动监听所有子`Model`的`update`事件
+### Collection 集合
+对`Model`集合的一层包装
 ```js
 import { Collection } from '@cherry-tomato/core';
 class CustomCollection extends Collection {
@@ -86,20 +96,22 @@ var collection = new CustomCollection(
   { attr2: 2 }
 )
 ```
-##### Static Attributes
-- key - 和`model`相同
-- [initialAttributes] - 和`model`相同
+##### Static Attributes 静态函数
 - [Model] - 用于自动生成子元素的构造函数
+- `Model` 所有函数
 
-#### Hooks
-- `model`的所有hooks
-- collectionDidUpdateChildren {Function(prevChildren: Array<Model>, nextChildren: Array<Model>)} - 添加/删除子元素之前触发
-- collectionDidAddChild {Function(prevChildren: Array<Model>, nextChildren: Array<Model>)} - 添加/删除子元素成功后触发
+#### Hooks 生命周期
+- `Model`的所有hooks
+- collectionWillUpdateChildren {Function(prevChildren: Array<Model>, nextChildren: Array<Model>)} - 添加/删除子元素之前后触发
+- collectionDidUpdateChildren {Function(prevChildren: Array<Model>, nextChildren: Array<Model>)} - 添加/删除子元素后触发
+- collectionChildDidUpdate - 任一子模型 进行 `modelDidUpdate`, `collectionDidUpdateChildren`, `collectionDidUpdateChildren` 后被唤起
 
-##### Arguments
+##### Arguments 实例化时的可选参数
 - `[initialAttributes]` 同`Model`的`initialAttributes`
 
-##### Method
+##### Method 内置函数（同时包含 Model 的内容）
+- `EventEmitter` 所有函数
+- `Model` 所有函数
 - 可以使用`Array`的各种方法 已支持`forEach`, `map`, `reduce`, `reduceRight`, `slice`, `filter`, `find`, `findIndex`, `some`, `every`, `includes`, `indexOf`
   ```
     collection.forEach((item) => {
@@ -108,18 +120,18 @@ var collection = new CustomCollection(
     // 3
     // 3
   ```
-- `addChild` - 添加一个子元素到最后，并添加监听
+- `addChild` - 添加一个子元素到最后，并添加监听，会自动使用设置的 `Static Model` 去创建
   - @params item {Object} - 子元素属性内容
-- `removeChild` - 移除一个子元素，并取消监听
+- `removeChild` - 移除一个子元素，并取消监听，会自动使用设置的 `Static Model` 去创建
   - @params item {Model} - 子元素实例
-- `resetChildren` - 重设所有子元素，并添加监听
+- `resetChildren` - 重设所有子元素，并添加监听，会自动使用设置的 `Static Model` 去创建
   - @params items {Array<Object>}
 
 
-## connect
+## connect 模型关联方法
 `model`高级用法，关联2个不同的 `model`
 
-### usage
+### 使用方法
 ```js
 import { Model, connect } from '@cartons/core';
 
@@ -139,7 +151,7 @@ let b = new ModelB();
 这样`a`被修改的时候，会关联触发`connect`中的`modelDidUpdate`，已同步更闹心
 
 ## 其他可用的功能
-### KeyCreators
+### KeyCreators 内置的key自动生成工具
 现在提供以下几种key生成规则
 
 <a id="randomCreator"></a>
