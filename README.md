@@ -18,10 +18,10 @@ npm install --save @cherry-tomato/core
 ## Documentation
 
 ### cherry-tomato
-[doc for cherry-tomato](./packages/@cherry-tomato/core)
+[doc for cherry-tomato](./packages/cherry-tomato)
 
 ### cherry-tomato 使用在 react 中
-[doc for @cherry-tomato/react](.//packages/@cherry-tomato/react)
+[doc for @cherry-tomato/react](.//packages/cherry-tomato-react)
 
 ### 更多例子...
 等待完善中...

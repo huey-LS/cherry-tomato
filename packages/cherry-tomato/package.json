@@ -27,5 +27,6 @@
     "nyc": "^14.1.1",
     "ts-node": "^8.4.1",
     "typescript": "^3.6.4"
-  }
+  },
+  "gitHead": "7a7544ac5de35919e2177f8abcb725bde865ff1a"
 }

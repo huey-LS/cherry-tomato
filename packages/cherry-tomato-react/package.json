@@ -34,5 +34,6 @@
   "dependencies": {
     "@cherry-tomato/core": "^2.0.0-alpha.2",
     "react": "^16.3.2"
-  }
+  },
+  "gitHead": "7a7544ac5de35919e2177f8abcb725bde865ff1a"
 }

@@ -26,7 +26,7 @@ npm install --save @cherry-tomato/core
   - [connect] 自动关联2个`Model`的装饰器
   - [serialize] 用于反序列化提取数据的装饰器
   - [output] 用于自动整合数据导出的装饰器
-- [Usage with react](https://github.com/huey-LS/cherry-tomato/tree/master/packages/cherry-tomato-react/README.md)
+- [Usage with react](https://github.com/huey-LS/cherry-tomato/tree/master/packages/cherry-tomato-react)
 
 ## API 介绍
 ### Model 模型
