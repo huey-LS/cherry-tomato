@@ -57,20 +57,6 @@ export function createThunkAttributeDecorator<
   }
 }
 
-function mixinThunkFunction<OptionsType> (
-  callback: ThunkAttributeDecorator<OptionsType>,
-  options: OptionsType,
-  target: Object
-) {
-  return callback.call(
-    target,
-    options,
-    target
-  );
-}
-
-
-
 function mixinDescriptor<OptionsType> (
   callback: ThunkAttributeDecorator<OptionsType>,
   options: OptionsType,
