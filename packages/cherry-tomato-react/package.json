@@ -1,6 +1,6 @@
 {
   "name": "@cherry-tomato/react",
-  "version": "2.0.0-alpha.2",
+  "version": "2.0.0-alpha.3",
   "description": "",
   "main": "index.js",
   "files": [
@@ -32,7 +32,7 @@
     "typescript": "^3.5.2"
   },
   "dependencies": {
-    "@cherry-tomato/core": "^2.0.0-alpha.2",
+    "@cherry-tomato/core": "^2.0.0-alpha.3",
     "react": "^16.3.2"
   },
   "gitHead": "7a7544ac5de35919e2177f8abcb725bde865ff1a"
