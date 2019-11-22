@@ -2,6 +2,10 @@ import {
   getPathData,
   getNewParentPathData
 } from '../shared/data-path';
+import {
+  enumerable,
+  writable
+} from '../shared/descriptors';
 
 /**
  * @export
@@ -18,6 +22,9 @@ export default class Attributes {
   }
 
   readonly __cartons_attributes = true;
+
+  @enumerable(false)
+  @writable(true)
   _attributes: Object;
 
   constructor (data = {}) {

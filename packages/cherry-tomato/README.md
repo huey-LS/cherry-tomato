@@ -17,15 +17,14 @@ npm install --save @cherry-tomato/core
 
 # API目录
 - [API](#api)
-  - [Model](#Model) 基础`Model`类
-  - [Collection](#Collection) 基础`Collection`类，是多个`Model`的集合（类似数组）
-  - [EventEmitter](#EventEmitter) 事件订阅基类，`Model` 事件基于此
-  - [KeyCreators](#KeyCreators) 内置的key生成工具
+  - [Model](#Model%20模型) 基础`Model`类
+  - [Collection](#Collection%20集合) 基础`Collection`类，是多个`Model`的集合（类似数组）
+  - [EventEmitter](#EventEmitter%20事件订阅基类) 事件订阅基类，`Model` 事件基于此
+  - [KeyCreators](#KeyCreators%20内置的key自动生成工具) 内置的key生成工具
     - [randomCreator](#randomCreator) 随机数key生成
     - [incrementCreator](#incrementCreator) 递增的key生成
-  - [connect] 自动关联2个`Model`的装饰器
-  - [serialize] 用于反序列化提取数据的装饰器
-  - [output] 用于自动整合数据导出的装饰器
+  - [serialize & output](#serialize%20%26%20output%20自动序列化&反序列化输出) 用于反序列化提取数据的装饰器
+  - [connect](#connect%20模型关联方法) 自动关联2个`Model`的装饰器
 - [Usage with react](https://github.com/huey-LS/cherry-tomato/tree/master/packages/cherry-tomato-react)
 
 ## API 介绍
@@ -128,12 +127,40 @@ var collection = new CustomCollection(
   - @params items {Array<Object>}
 
 
+## EventEmitter 事件订阅基类
+待补充
+
+
+## serialize & output 自动序列化&反序列化输出
+```js
+class MyModel extends Model {
+  @serialize('xxxCount')
+  get count () { return 0; }
+  set count (arg) {}
+
+  @output()
+  getFormated () {
+    return [
+      'count'
+    ]
+  }
+}
+const myModel = new MyModel();
+myModel.count // 0, 自定义的getter将作为默认内容输出
+myModel.count = 1 //
+myModel.count // 1， 能通过 setter 更新
+myModel.getFormated() // { xxxCount: 1 } 还能导出原样格式的
+
+const myModel2 = new MyModel({ xxxCount: 3 });
+myModel2.count // 3, 可以初始化
+```
+
 ## connect 模型关联方法
 `model`高级用法，关联2个不同的 `model`
 
 ### 使用方法
 ```js
-import { Model, connect } from '@cartons/core';
+import { Model, connect } from '@cherry-tomato/core';
 
 import ModelA from './model-a';
 
@@ -165,26 +192,4 @@ let b = new ModelB();
 <a id="incrementCreator"></a>
 
 #### `incrementCreator(prefix = '')` 以递增方式返回key
-
-
-### actions
-
-#### `bindAction(filter: Function|Object)))`
-##### usage
-```js
-class A {
-  @bindAction((_self) => (_self.model)) action1 = action1;
-  model = new CustomModel();
-}
-
-var a = new A();
-a.action1(1);
-
-function action1 (param) {
-  // param === 1
-  return function (model) {
-    // model === a.model
-  }
-}
-```
 

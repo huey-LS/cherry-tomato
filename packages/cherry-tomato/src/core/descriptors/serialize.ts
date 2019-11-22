@@ -1,15 +1,13 @@
 import {
-  createThunkAttributeDescriptor
+  createThunkAttributeDecorator
 } from '../../shared/utils';
 
 import Model from '../model';
 
 
-const serialize = createThunkAttributeDescriptor<string|{
+const serialize = createThunkAttributeDecorator<undefined|string|{
   name: string,
   type?: Function,
-  default?: any,
-  writable?: boolean,
   writableType?: Function
 }>(function (
   options,
@@ -20,50 +18,64 @@ const serialize = createThunkAttributeDescriptor<string|{
   let name: string;
   let type: Function|undefined;
   let writableType: Function|undefined;
-  let defaultValue: any;
-  let writable: boolean = false;
+  let oldSetter: any;
+  let oldGetter: any;
 
   let serializeMaps = target['__serialize_maps'];
   if (!serializeMaps) {
     serializeMaps = target['__serialize_maps'] = {};
   }
 
-  if (typeof options === 'string') {
+  if (!options) {
+    name = key;
+  } else if (typeof options === 'string') {
     name = options;
   } else {
     name = options.name;
     type = options.type;
-    defaultValue = options.default;
-    writable = !!options.writable;
     writableType = options.writableType;
   }
 
+
   if (key && descriptor) {
-    descriptor.enumerable = true;
-    descriptor.get = function () {
-      if (Model.isModel(this)) {
-        let value = (this as any).get(name);
-        if (type) {
-          value = type(value);
-        } else if (typeof value === 'undefined'){
+    oldSetter = descriptor.set;
+    oldGetter = descriptor.get;
+
+    // console.log(descriptor, oldGetter);
+    if (oldGetter) {
+      descriptor.enumerable = true;
+      descriptor.get = function () {
+        let defaultValue = oldGetter && oldGetter.call(this);
+        let value;
+        if (Model.isModel(this)) {
+          value = this.get(name);
+          if (type) {
+            value = type(value);
+          } else if (typeof value === 'undefined'){
+            value = defaultValue;
+          }
+        } else {
           value = defaultValue;
         }
+
         return value;
       }
     }
 
-    if (writable) {
-      descriptor.set = function (newValue) {
+    if (oldSetter) {
+      descriptor.set = function (newValue: any) {
         if (Model.isModel(this)) {
           if (writableType) {
             newValue = writableType(newValue);
           }
-          (this as any).set(name, newValue);
+          this.set(name, newValue);
         }
+
+        oldSetter.call(this, newValue)
       }
     }
 
-    delete descriptor.writable;
+    // delete descriptor.writable;
 
     serializeMaps[key] = name;
   }
@@ -73,7 +85,7 @@ export default serialize;
 
 
 
-const output = createThunkAttributeDescriptor(function (
+const output = createThunkAttributeDecorator<any>(function (
   options,
   target,
   key,

@@ -11,7 +11,7 @@
     "clean": "rm -fr lib",
     "build": "npm run clean && tsc",
     "dev": "npm run clean && tsc -w",
-    "test": "mocha --require ts-node/register --noEmit -p test-tsconfig.js --watch-extensions ts",
+    "test": "mocha --require ts-node/register --noEmit -P tsconfig.test.json --watch-extensions ts",
     "nyc": "nyc npm run test",
     "prepare": "npm run build"
   },

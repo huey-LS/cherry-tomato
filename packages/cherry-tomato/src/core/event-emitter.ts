@@ -5,6 +5,10 @@ import {
   WILL_DESTROY,
   DID_DESTROY
 } from '../constants/life-cycle';
+import {
+  enumerable,
+  writable
+} from '../shared/descriptors';
 
 export class Event {
   data: any;
@@ -53,7 +57,13 @@ export default class EventEmitter<EventsConfig extends CommonEventConfig = Commo
   }
 
   readonly __cartons_event = true;
+
+  @enumerable(false)
+  @writable(true)
   _events: EventCallbacksByType;
+
+  @enumerable(false)
+  @writable(true)
   _destroyed: boolean;
 
   constructor () {

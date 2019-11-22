@@ -8,6 +8,10 @@ import {
   MODEL_DID_UPDATE,
   MODEL_WILL_UPDATE
  } from '../constants/life-cycle';
+import {
+  enumerable,
+  writable
+} from '../shared/descriptors';
 import { respond } from '../shared/spread';
 import {
   KeyCreator,
@@ -42,6 +46,8 @@ export default class Model<ModelEvents extends CommonModelEventConfig = CommonMo
 
   readonly __cartons_model = true;
 
+  @enumerable(false)
+  @writable(true)
   _attributes: Attributes;
 
   key!: string;

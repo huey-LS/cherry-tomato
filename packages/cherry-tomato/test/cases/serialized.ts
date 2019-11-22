@@ -11,20 +11,20 @@ class InitialAttributesModel extends Model {
     count: 1
   })
 
-  @serialize('count')
-  count!: number;
+  @serialize()
+  get count () { return 0;}
+  set count (arg) {}
 
 
   @serialize({
-    name: 'testDefault',
-    default: 'default value'
+    name: 'testDefault'
   })
-  testDefault!: string;
+  get testDefault () { return 'default value'; };
 
   @serialize({
     name: 'count'
   })
-  differentKey!: string;
+  get differentKey () { return 0; };
 
   @output({})
   getFormated () {
@@ -66,6 +66,18 @@ describe('serialized', function () {
     assert.deepStrictEqual(
       { count: 1, testDefault: 'default value' },
       model.getDifferentFormated()
+    );
+  })
+
+  it ('should update count by setter success', () => {
+    model.count = 2;
+    assert.strictEqual(
+      2,
+      model.count
+    );
+    assert.strictEqual(
+      2,
+      model.differentKey
     );
   })
 })

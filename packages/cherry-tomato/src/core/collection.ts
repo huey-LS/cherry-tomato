@@ -14,6 +14,10 @@ import {
   COLLECTION_DID_UPDATE_CHILDREN,
   COLLECTION_CHILD_DID_UPDATE
 } from '../constants/life-cycle';
+import {
+  enumerable,
+  writable
+} from '../shared/descriptors';
 import { respond } from '../shared/spread';
 import { mixinFunctionFromArray } from '../shared/utils';
 
@@ -57,19 +61,27 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
   static childrenJSONKey: string = 'children';
 
   readonly __cartons_collection = true;
-  autoSubscribeChildren = true;
 
+
+  @enumerable(false)
   get _Model () {
     const constructor = this.constructor as typeof Collection;
     return constructor.Model;
   }
 
+  @enumerable(false)
   get _isChildModel () {
     const constructor = this.constructor as typeof Collection;
     return constructor.isChildModel || ((model) => (model instanceof this._Model));
   }
+
+  @enumerable(false)
+  @writable(true)
   _children: ModelClass[] = [];
 
+
+  @enumerable(false)
+  @writable(true)
   _childListener = (event: Event) => {
     if (
       ~[
@@ -134,6 +146,8 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
     return this._children;
   }
 
+
+  @enumerable(false)
   get length () {
     return this._children.length;
   }
@@ -195,26 +209,6 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
 
     return this;
   }
-
-  // _subscribeChildren () {
-  //   if (this.autoSubscribeChildren) {
-  //     this.forEach((child) => {
-  //       child.addListener(
-  //         this._childListener
-  //       )
-  //     })
-  //   }
-  // }
-
-  // _unsubscribeChildren () {
-  //   if (this.autoSubscribeChildren) {
-  //     this.forEach((child) => {
-  //       child.removeListener(
-  //         this._childListener
-  //       )
-  //     })
-  //   }
-  // }
 
   _resetChild (nextChildren: ModelClass[]) {
     const prevChildren = this._children;

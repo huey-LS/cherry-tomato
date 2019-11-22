@@ -4,6 +4,7 @@
     "outDir": "lib",
     "baseUrl": ".",
     "rootDir": "src",
+    "experimentalDecorators": true,
     "paths": {
       "@/*": ["src/*"]
     }

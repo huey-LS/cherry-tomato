@@ -4,7 +4,7 @@ import {
 } from '../../constants/life-cycle';
 
 import {
-  createThunkAttributeDescriptor
+  createThunkAttributeDecorator
 } from '../../shared/utils';
 import Model from '../model';
 import Attributes from '../attributes';
@@ -15,7 +15,7 @@ interface ConnectThunkDecorator {
   ): (target: any, key: string, descriptor?: PropertyDescriptor | undefined) => any
 }
 
-let connect =  createThunkAttributeDescriptor<ConnectOptions>(function (
+let connect =  createThunkAttributeDecorator<ConnectOptions>(function (
   options = {},
   target,
   key,
