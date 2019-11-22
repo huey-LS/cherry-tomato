@@ -124,7 +124,7 @@ var collection = new CustomCollection(
 - `removeChild` - 移除一个子元素，并取消监听，会自动使用设置的 `Static Model` 去创建
   - @params item {Model} - 子元素实例
 - `resetChildren` - 重设所有子元素，并添加监听，会自动使用设置的 `Static Model` 去创建
-  - @params items {Array<Object>}
+  - @params items {Array} - 子元素数据数组
 
 
 ## EventEmitter 事件订阅基类
