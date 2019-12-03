@@ -37,14 +37,14 @@ export default class Model<ModelEvents extends CommonModelEventConfig = CommonMo
     return obj &&
       (
         obj instanceof Model
-        || obj.__cartons_model
+        || obj.__cherry_tomato_model
       )
   }
 
   static initialAttributes: () => any;
   static key?: string|KeyCreator;
 
-  readonly __cartons_model = true;
+  readonly __cherry_tomato_model = true;
 
   @enumerable(false)
   @writable(true)

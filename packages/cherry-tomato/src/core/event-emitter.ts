@@ -52,11 +52,11 @@ export default class EventEmitter<EventsConfig extends CommonEventConfig = Commo
     return obj &&
       (
         obj instanceof Event
-        || obj.__cartons_event
+        || obj.__cherry_tomato_event
       )
   }
 
-  readonly __cartons_event = true;
+  readonly __cherry_tomato_event = true;
 
   @enumerable(false)
   @writable(true)

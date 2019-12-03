@@ -11,7 +11,7 @@ class InitialAttributesModel extends Model {
     count: 1
   })
 
-  @serialize()
+  @serialize('count')
   get count () { return 0;}
   set count (arg) {}
 
@@ -41,7 +41,24 @@ class InitialAttributesModel extends Model {
       'differentKey'
     ]
   }
+}
 
+class TestModel extends Model {
+  static initialAttributes = () => ({
+    count2: 2
+  })
+
+  @serialize({
+    name: 'count2'
+  })
+  get count () { return 0;}
+
+  @output({})
+  getFormated () {
+    return [
+      'count'
+    ]
+  }
 }
 
 describe('serialized', function () {
@@ -78,6 +95,14 @@ describe('serialized', function () {
     assert.strictEqual(
       2,
       model.differentKey
+    );
+  })
+
+  it ('should serialize don\'t interact with different model', () => {
+    var testModel = new TestModel();
+    assert.deepStrictEqual(
+      { count2: 2 },
+      testModel.getFormated()
     );
   })
 })

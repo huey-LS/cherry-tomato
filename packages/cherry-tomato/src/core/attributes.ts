@@ -17,11 +17,11 @@ export default class Attributes {
     return obj &&
       (
         obj instanceof Attributes
-        || obj.__cartons_attributes
+        || obj.__cherry_tomato_attributes
       )
   }
 
-  readonly __cartons_attributes = true;
+  readonly __cherry_tomato_attributes = true;
 
   @enumerable(false)
   @writable(true)

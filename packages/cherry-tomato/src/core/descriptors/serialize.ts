@@ -21,10 +21,20 @@ const serialize = createThunkAttributeDecorator<undefined|string|{
   let oldSetter: any;
   let oldGetter: any;
 
-  let serializeMaps = target['__serialize_maps'];
-  if (!serializeMaps) {
-    serializeMaps = target['__serialize_maps'] = {};
+  const MAPS_KEY = '__serialize_maps';
+  if (!Object.getOwnPropertyDescriptor(target, MAPS_KEY)) {
+    let originSerializeMaps = {};
+    if (target[MAPS_KEY]) {
+      Object.assign(originSerializeMaps, target[MAPS_KEY]);
+    }
+    Object.defineProperty(target, MAPS_KEY, {
+      configurable: true,
+      enumerable: false,
+      value: originSerializeMaps
+    })
   }
+
+  let serializeMaps = target[MAPS_KEY];
 
   if (!options) {
     name = key;

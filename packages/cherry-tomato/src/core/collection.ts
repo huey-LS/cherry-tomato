@@ -50,7 +50,7 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
     return obj &&
         (
           obj instanceof Collection
-          || obj.__cartons_collection
+          || obj.__cherry_tomato_collection
         )
   };
 
@@ -60,7 +60,7 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
 
   static childrenJSONKey: string = 'children';
 
-  readonly __cartons_collection = true;
+  readonly __cherry_tomato_collection = true;
 
 
   @enumerable(false)
