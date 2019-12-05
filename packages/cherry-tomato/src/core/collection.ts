@@ -87,16 +87,13 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
       ~[
         MODEL_DID_UPDATE,
         COLLECTION_CHILD_DID_UPDATE,
-        COLLECTION_DID_UPDATE_CHILDREN,
+        COLLECTION_DID_UPDATE_CHILDREN
       ].indexOf(event.type)
     ) {
       respond(
         COLLECTION_CHILD_DID_UPDATE,
         this,
-        [
-          event.target,
-          event.data[0]
-        ]
+        [event]
       );
     }
   }
@@ -181,11 +178,11 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
 
   destroy () {
     super.destroy();
-    // this._unsubscribeChildren();
+    this._unsubscribeChildren();
+    this._children = [];
   }
 
   _addChild (newChild: ModelClass) {
-    // const newChild = this._createModal(item);
     const prevChildren = this._children;
     const nextChildren = [
       ...prevChildren,
@@ -213,11 +210,23 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
   _resetChild (nextChildren: ModelClass[]) {
     const prevChildren = this._children;
     respond(COLLECTION_WILL_UPDATE_CHILDREN, this, [prevChildren, nextChildren]);
-    // this._unsubscribeChildren();
+    this._unsubscribeChildren();
     this._children = nextChildren;
-    // this._subscribeChildren();
+    this._subscribeChildren();
     respond(COLLECTION_DID_UPDATE_CHILDREN, this, [prevChildren, nextChildren]);
     return this;
+  }
+
+  _unsubscribeChildren () {
+    this._children.map((model) => {
+      model.removeAllListener(this._childListener);
+    })
+  }
+
+  _subscribeChildren () {
+    this._children.map((model) => {
+      model.addAllListener(this._childListener);
+    })
   }
 
   _createModal (item: any) {

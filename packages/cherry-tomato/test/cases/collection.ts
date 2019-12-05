@@ -38,4 +38,68 @@ describe('Collection', function () {
     testCollection.removeChild(testModel.key);
     assert.strictEqual(0, testCollection.length);
   })
+
+  it ('should life-cycle collectionWillUpdateChildren call success', (done) => {
+    class WillUpdateChildrenTestCollection extends Collection {
+      static Model = InitialAttributesModel;
+
+      collectionWillUpdateChildren (prevChildren: any[], nextChildren: any[]) {
+        try {
+          assert.strictEqual(prevChildren.length, 0);
+          assert.strictEqual(nextChildren.length, 1);
+          assert.strictEqual(this.children, prevChildren);
+          assert.strictEqual(nextChildren[0].get('text'), 'abc');
+          done();
+        } catch (e) {
+          done(e);
+        }
+      }
+    }
+
+    const willUpdateChildrenTestCollection = new WillUpdateChildrenTestCollection();
+    willUpdateChildrenTestCollection.addChild({ text: 'abc' });
+  })
+  it ('should life-cycle collectionDidUpdateChildren call success', (done) => {
+    class DidUpdateChildrenTestCollection extends Collection {
+      static Model = InitialAttributesModel;
+
+      collectionDidUpdateChildren (prevChildren: any[], nextChildren: any[]) {
+        try {
+          assert.strictEqual(prevChildren.length, 0);
+          assert.strictEqual(nextChildren.length, 1);
+          assert.strictEqual(this.children, nextChildren);
+          assert.strictEqual(this.children[0].get('text'), 'abc');
+          done();
+        } catch (e) {
+          done(e);
+        }
+      }
+    }
+
+    const didUpdateChildrenTestCollection = new DidUpdateChildrenTestCollection();
+    didUpdateChildrenTestCollection.addChild({ text: 'abc' });
+  })
+  it ('should life-cycle collectionChildDidUpdate call success', (done) => {
+    class ChildDidUpdateTestCollection extends Collection {
+      static Model = InitialAttributesModel;
+
+      collectionChildDidUpdate (event: any) {
+        const { type, data, target } = event;
+        try {
+          assert.strictEqual(type, 'modelDidUpdate');
+          assert.strictEqual(data.length, 2);
+          assert.strictEqual(data[0].get('text'), 'abc');
+          assert.strictEqual(data[1].get('text'), 'def');
+          assert.strictEqual(target.get('text'), 'def');
+          done();
+        } catch (e) {
+          done(e);
+        }
+      }
+    }
+
+    const childDidUpdateTestCollection = new ChildDidUpdateTestCollection();
+    childDidUpdateTestCollection.addChild({ text: 'abc' });
+    childDidUpdateTestCollection.children[0].set({ text: 'def' });
+  })
 })

@@ -14,20 +14,18 @@ export class Event {
   data: any;
   target: any;
   type: string;
-  currentTarget: any;
+  origin?: Event;
 
   constructor (
     options: {
       data: any,
       target: any,
-      currentTarget?: any,
       type: string
     }
   ) {
-    const { data, target, type, currentTarget } = options;
+    const { data, target, type } = options;
     this.data = data;
     this.target = target;
-    this.currentTarget = currentTarget || target;
     this.type = type;
 
     return this;
@@ -64,14 +62,19 @@ export default class EventEmitter<EventsConfig extends CommonEventConfig = Commo
 
   @enumerable(false)
   @writable(true)
+  _all_events: TypedEventCallback[]
+
+  @enumerable(false)
+  @writable(true)
   _destroyed: boolean;
 
   constructor () {
     this._events = {};
+    this._all_events = [];
     this._destroyed = false;
   }
 
-  emit (name: Event|keyof EventsConfig, data: any) {
+  emit (name: Event|keyof EventsConfig, data: any, originEvent?: Event) {
     let event: Event;
     if (EventEmitter.isEvent(name)) {
       event = data;
@@ -82,6 +85,9 @@ export default class EventEmitter<EventsConfig extends CommonEventConfig = Commo
         type: name as string
       });
     }
+    if (originEvent) {
+      event.origin = originEvent;
+    }
 
     let type = event.type;
     let events = this._events[type];
@@ -90,8 +96,30 @@ export default class EventEmitter<EventsConfig extends CommonEventConfig = Commo
         callback(event);
       })
     }
+
+    this._all_events.forEach((callback) => {
+      callback(event);
+    })
   }
 
+  addAllListener (callback: TypedEventCallback) {
+    let removeListener = () => {};
+    if (callback) {
+      let events = this._all_events;
+      events.push(callback);
+      removeListener = () => {
+        this.removeAllListener(callback);
+      }
+    }
+    return removeListener;
+  }
+
+  removeAllListener (callback: TypedEventCallback) {
+    if (this._destroyed) return false;
+    let events = this._all_events;
+    this._removeEventCallback(events, callback);
+    return callback;
+  }
 
   addListener<K extends keyof EventsConfig>(name: K, callback: EventsConfig[K]) {
     let removeListener = () => {};
@@ -100,8 +128,6 @@ export default class EventEmitter<EventsConfig extends CommonEventConfig = Commo
       let events = this._events[name as string];
       if (!events) events = this._events[name as string] = [];
       events.push(callback as any);
-    }
-    if (callback) {
       removeListener = () => {
         this.removeListener(callback as any);
       }
@@ -113,13 +139,13 @@ export default class EventEmitter<EventsConfig extends CommonEventConfig = Commo
     if (this._destroyed) return false;
     let events = this._events;
     Object.keys(events).forEach((key) => {
-      this._remove(events[key], callback);
+      this._removeEventCallback(events[key], callback);
     })
 
     return callback;
   }
 
-  _remove (events: TypedEventCallback[], callback: TypedEventCallback) {
+  _removeEventCallback (events: TypedEventCallback[], callback: TypedEventCallback) {
     let index = events.findIndex((fn) => (fn === callback));
     if (index > -1) {
       events.splice(index, 1);
@@ -130,6 +156,7 @@ export default class EventEmitter<EventsConfig extends CommonEventConfig = Commo
   destroy () {
     respond(WILL_DESTROY, this);
     this._events = {};
+    this._all_events = [];
     this._destroyed = true;
     respond(DID_DESTROY, this);
   }
@@ -141,6 +168,7 @@ export default class EventEmitter<EventsConfig extends CommonEventConfig = Commo
       newEvents[key] = [ ...events[key] ];
       return newEvents
     }, {} as EventCallbacksByType);
+    newThis._all_events = this._all_events.slice(0);
     return newThis;
   }
 }

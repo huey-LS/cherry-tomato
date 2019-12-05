@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Model } from '@cherry-tomato/core';
+import { Model, Collection } from '@cherry-tomato/core';
 
 export default function observer (options = {}) {
   let autoUpdateEvents = options.autoUpdateEvents;
