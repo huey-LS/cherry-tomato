@@ -47,7 +47,7 @@ function createObserveForComponent (model, component, autoUpdateEvents) {
   } else if (typeof autoUpdateEvents === 'function') {
     currentUpdateEvents = autoUpdateEvents(model, key);
   }
-  const removeListeners = currentUpdateEvents.map((eventName) => {
+  let removeListeners = currentUpdateEvents.map((eventName) => {
     return model.addListener(eventName, () => {
       component.forceUpdate();
     })
