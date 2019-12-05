@@ -1,33 +1,64 @@
-import { Model } from '@cherry-tomato/core';
+import {
+  Model,
+  Collection
+} from '@cherry-tomato/core';
 
-export default function observe () {
+export default function observe (options = {}) {
+  let autoUpdateEvents = options.autoUpdateEvents;
+
   return function (target, key, descriptor) {
     if (Model.isModel(descriptor.value)) {
-      let value = descriptor.value;
-      createObserveForComponent(value, target);
+      createObserveForComponent(
+        descriptor.value,
+        target,
+        autoUpdateEvents
+      );
     } else if (descriptor.initializer){
       const oldInitializer = descriptor.initializer;
 
       descriptor.initializer = function () {
         const _this = this;
         const oldValue = oldInitializer.call(_this);
-        if (Model.isModel(oldValue)) {
-          createObserveForComponent(oldValue, _this);
-        }
+        createObserveForComponent(
+          oldValue,
+          _this,
+          autoUpdateEvents
+        );
         return oldValue;
       }
     }
     return descriptor;
   }
 }
-function createObserveForComponent (model, component) {
-  let removeListener = model.on('modelDidUpdate', () => {
-    component.forceUpdate();
+function createObserveForComponent (model, component, autoUpdateEvents) {
+  if (!Model.isModel(model)) return;
+  let currentUpdateEvents = autoUpdateEvents;
+  if (!autoUpdateEvents) {
+    if (Collection.isCollection(model)) {
+      currentUpdateEvents = [
+        'modelDidUpdate',
+        'collectionDidUpdateChildren'
+      ]
+    } else if (Model.isModel(model)) {
+      currentUpdateEvents = [
+        'modelDidUpdate'
+      ]
+    }
+  } else if (typeof autoUpdateEvents === 'function') {
+    currentUpdateEvents = autoUpdateEvents(model, key);
+  }
+  const removeListeners = currentUpdateEvents.map((eventName) => {
+    return model.addListener(eventName, () => {
+      component.forceUpdate();
+    })
   })
 
   let oldComponentWillUnmount = component.componentWillUnmount;
   component.componentWillUnmount = function (...args) {
-    removeListener();
+    removeListeners.forEach((removeListener) => {
+      removeListener();
+    });
+    removeListeners = null;
     if (typeof oldComponentWillUnmount === 'function') {
       oldComponentWillUnmount.call(this, ...args);
     }
