@@ -1,12 +1,24 @@
 import * as React from 'react';
-import { Model, Collection } from '@cherry-tomato/core';
+import {
+  Model,
+  Collection
+} from '@cherry-tomato/core';
 
-export default function observer (options = {}) {
+interface ObserverOptions {
+  autoUpdateEvents?: AutoUpdateEvents
+}
+
+interface AutoUpdateEventNameCreator {
+  (model: any, key: string): string[];
+}
+type AutoUpdateEvents = string[] | AutoUpdateEventNameCreator;
+export default function observer (options: ObserverOptions = {}) {
   let autoUpdateEvents = options.autoUpdateEvents;
 
-  return function (Component) {
-    return class CherryTomatoObserverComponent extends React.Component {
-      constructor (props) {
+  return function (Component: any) {
+    return class CherryTomatoObserverComponent extends React.Component<any> {
+      __listeners: any;
+      constructor (props: any) {
         super(props);
 
         this.__listeners = {};
@@ -20,7 +32,7 @@ export default function observer (options = {}) {
         this.removeListener();
       }
 
-      componentWillReceiveProps (nextProps) {
+      componentWillReceiveProps (nextProps: any) {
         this.removeListener();
         this.observe(nextProps);
       }
@@ -37,11 +49,11 @@ export default function observer (options = {}) {
         this.forceUpdate();
       }
 
-      observe = (props) => {
+      observe = (props: any) => {
         Object.keys(props).forEach((key) => {
           let model = props[key];
           if (Model.isModel(model)) {
-            let currentUpdateEvents = autoUpdateEvents;
+            let currentUpdateEvents: string[] = [];
             if (!autoUpdateEvents) {
               if (Collection.isCollection(model)) {
                 currentUpdateEvents = [
@@ -55,6 +67,8 @@ export default function observer (options = {}) {
               }
             } else if (typeof autoUpdateEvents === 'function') {
               currentUpdateEvents = autoUpdateEvents(model, key);
+            } else {
+              autoUpdateEvents = autoUpdateEvents;
             }
             this.__listeners[key] = currentUpdateEvents.map((eventName) => {
               return model.addListener(eventName, () => {
@@ -69,7 +83,7 @@ export default function observer (options = {}) {
         let listeners = this.__listeners;
         Object.keys(listeners).forEach((key) => {
           let removeListeners = listeners[key];
-          removeListeners.forEach((removeListener) => {
+          removeListeners.forEach((removeListener: any) => {
             removeListener();
           });
         })
