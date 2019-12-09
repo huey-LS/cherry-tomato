@@ -4,12 +4,11 @@
     "outDir": "lib",
     "baseUrl": ".",
     "rootDir": "src",
-    "experimentalDecorators": true,
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "jsx": "react"
   },
   "exclude": [
-    "test"
+    "node_modules",
+    "test",
+    "lib"
   ]
 }

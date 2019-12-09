@@ -3,13 +3,11 @@
   "compilerOptions": {
     "outDir": "lib",
     "baseUrl": ".",
-    "rootDir": "src",
-    "experimentalDecorators": true,
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "rootDir": "src"
   },
   "exclude": [
-    "test"
+    "node_modules",
+    "test",
+    "lib"
   ]
 }

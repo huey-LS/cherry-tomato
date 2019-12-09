@@ -13,11 +13,8 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "lib": [
-      "ESNext"
+      "ESNext",
+      "DOM"
     ]
-  },
-  "exclude": [
-    "node_modules",
-    "lib"
-  ]
+  }
 }
