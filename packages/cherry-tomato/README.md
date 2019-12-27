@@ -125,6 +125,9 @@ var collection = new CustomCollection(
   - @params item {Model} - 子元素实例
 - `resetChildren` - 重设所有子元素，并添加监听，会自动使用设置的 `Static Model` 去创建
   - @params items {Array} - 子元素数据数组
+- `merge` & `concat` - 合并2个或者多个`collection`，
+  - `merge` 会合并到原始的
+  - `concat`会返回一个新的`collection`
 
 
 ## EventEmitter 事件订阅基类

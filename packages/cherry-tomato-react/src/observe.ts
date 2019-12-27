@@ -3,19 +3,11 @@ import {
   Collection
 } from '@cherry-tomato/core';
 
-interface ObserveOptions {
-  autoUpdateEvents?: AutoUpdateEvents
-}
+import autoObserve, { ObserveOptions } from './auto-observe';
 
-interface AutoUpdateEventNameCreator {
-  (model: any, key: string): string[];
-}
-type AutoUpdateEvents = string[] | AutoUpdateEventNameCreator;
 export default function observe (
-  options: ObserveOptions = {}
+  options?: ObserveOptions
 ) {
-  let autoUpdateEvents = options.autoUpdateEvents;
-
   return function (
     target: any,
     key: string,
@@ -26,7 +18,7 @@ export default function observe (
         descriptor.value,
         target,
         key,
-        autoUpdateEvents
+        options
       );
     } else if ((descriptor as any).initializer){
       const oldInitializer = (descriptor as any).initializer;
@@ -38,7 +30,7 @@ export default function observe (
           oldValue,
           _this,
           key,
-          autoUpdateEvents
+          options
         );
         return oldValue;
       }
@@ -50,38 +42,18 @@ function createObserveForComponent (
   model: any,
   component: any,
   key: string,
-  autoUpdateEvents?: AutoUpdateEvents
+  options?: ObserveOptions
 ) {
   if (!Model.isModel(model)) return;
-  let currentUpdateEvents: string[] = [];
-  if (!autoUpdateEvents) {
-    if (Collection.isCollection(model)) {
-      currentUpdateEvents = [
-        'modelDidUpdate',
-        'collectionDidUpdateChildren'
-      ]
-    } else if (Model.isModel(model)) {
-      currentUpdateEvents = [
-        'modelDidUpdate'
-      ]
-    }
-  } else if (typeof autoUpdateEvents === 'function') {
-    currentUpdateEvents = autoUpdateEvents(model, key);
-  } else {
-    currentUpdateEvents = autoUpdateEvents;
-  }
-  let removeListeners = currentUpdateEvents.map((eventName) => {
-    return model.addListener(eventName as any, () => {
-      component.forceUpdate();
-    })
-  })
+  let removeListener = autoObserve(
+    model,
+    () => { component.forceUpdate(); },
+    options
+  )
 
   let oldComponentWillUnmount = component.componentWillUnmount;
   component.componentWillUnmount = function (...args: any) {
-    removeListeners.forEach((removeListener) => {
-      removeListener();
-    });
-    removeListeners = [];
+    removeListener();
     if (typeof oldComponentWillUnmount === 'function') {
       oldComponentWillUnmount.call(this, ...args);
     }

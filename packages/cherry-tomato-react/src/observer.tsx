@@ -4,24 +4,15 @@ import {
   Collection
 } from '@cherry-tomato/core';
 
-interface ObserverOptions {
-  autoUpdateEvents?: AutoUpdateEvents
-}
+import autoObserve, { ObserveOptions } from './auto-observe';
 
-interface AutoUpdateEventNameCreator {
-  (model: any, key: string): string[];
-}
-type AutoUpdateEvents = string[] | AutoUpdateEventNameCreator;
-export default function observer (options: ObserverOptions = {}) {
-  let autoUpdateEvents = options.autoUpdateEvents;
-
+export default function observer (options?: ObserveOptions) {
   return function (Component: any) {
     return class CherryTomatoObserverComponent extends React.Component<any> {
-      __listeners: any;
+      __removeListeners: any;
       constructor (props: any) {
         super(props);
-
-        this.__listeners = {};
+        this.__removeListeners = {};
       }
 
       componentDidMount () {
@@ -53,41 +44,23 @@ export default function observer (options: ObserverOptions = {}) {
         Object.keys(props).forEach((key) => {
           let model = props[key];
           if (Model.isModel(model)) {
-            let currentUpdateEvents: string[] = [];
-            if (!autoUpdateEvents) {
-              if (Collection.isCollection(model)) {
-                currentUpdateEvents = [
-                  'modelDidUpdate',
-                  'collectionDidUpdateChildren'
-                ]
-              } else if (Model.isModel(model)) {
-                currentUpdateEvents = [
-                  'modelDidUpdate'
-                ]
-              }
-            } else if (typeof autoUpdateEvents === 'function') {
-              currentUpdateEvents = autoUpdateEvents(model, key);
-            } else {
-              autoUpdateEvents = autoUpdateEvents;
-            }
-            this.__listeners[key] = currentUpdateEvents.map((eventName) => {
-              return model.addListener(eventName, () => {
+            this.__removeListeners[key] = autoObserve(
+              model,
+              () => {
                 this.updateView()
-              })
-            })
+              },
+              options
+            )
           }
         })
       }
 
       removeListener () {
-        let listeners = this.__listeners;
-        Object.keys(listeners).forEach((key) => {
-          let removeListeners = listeners[key];
-          removeListeners.forEach((removeListener: any) => {
-            removeListener();
-          });
+        let removeListeners = this.__removeListeners;
+        Object.keys(removeListeners).forEach((key) => {
+          removeListeners[key]();
         })
-        this.__listeners = {};
+        this.__removeListeners = {};
       }
     }
   }

@@ -112,6 +112,36 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
   includes!: Array<ModelClass>["includes"];
   indexOf!: Array<ModelClass>["indexOf"];
 
+  merge (...args: Collection<ModelClass>[]) {
+    const constructor = this.constructor as typeof Collection;
+    if (
+      args.some((collection) => {
+        return !(collection instanceof constructor);
+      })
+    ) {
+      throw new Error('collection.concat must be the same collection');
+    }
+    this.resetChildren(
+      this.children.concat(...args.map(({ children })=> children))
+    );
+  }
+
+  concat (...args: Collection<ModelClass>[]) {
+    const constructor = this.constructor as typeof Collection;
+    if (
+      args.some((collection) => {
+        return !(collection instanceof constructor);
+      })
+    ) {
+      throw new Error('collection.concat must be the same collection');
+    }
+    let newCollection = new constructor();
+    newCollection.resetChildren(
+      this.children.concat(...args.map(({ children })=> children))
+    );
+    return newCollection;
+  }
+
   // before children change
   [COLLECTION_WILL_UPDATE_CHILDREN] (prevChildren: ModelClass[], nextChildren: ModelClass[]) {}
   // after children change

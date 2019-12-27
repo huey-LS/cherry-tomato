@@ -39,6 +39,41 @@ describe('Collection', function () {
     assert.strictEqual(0, testCollection.length);
   })
 
+  it ('should merge success', () => {
+    let testCollection1 = new TestCollection();
+    let testCollection2 = new TestCollection();
+    testCollection1.addChild({ text: 'abc1' });
+    testCollection2.addChild({ text: 'abc2' });
+    testCollection1.merge(testCollection2);
+    assert.strictEqual(2, testCollection1.length);
+    assert.strictEqual(1, testCollection2.length);
+    let testModel1 = testCollection1.children[0];
+    assert.strictEqual('abc1', testModel1.get('text'))
+    let testModel2 = testCollection1.children[1];
+    assert.strictEqual('abc2', testModel2.get('text'))
+    let testModel2From2 = testCollection2.children[0];
+    assert.strictEqual(testModel2From2, testModel2);
+  })
+
+  it ('should concat success', () => {
+    let testCollection1 = new TestCollection();
+    let testCollection2 = new TestCollection();
+    testCollection1.addChild({ text: 'abc1' });
+    testCollection2.addChild({ text: 'abc2' });
+    let testCollection3 = testCollection1.concat(testCollection2);
+    assert.strictEqual(1, testCollection1.length);
+    assert.strictEqual(1, testCollection2.length);
+    assert.strictEqual(2, testCollection3.length);
+    let testModel1 = testCollection3.children[0];
+    assert.strictEqual('abc1', testModel1.get('text'))
+    let testModel2 = testCollection3.children[1];
+    assert.strictEqual('abc2', testModel2.get('text'))
+    let testModel1From1 = testCollection1.children[0];
+    assert.strictEqual(testModel1From1, testModel1);
+    let testModel2From2 = testCollection2.children[0];
+    assert.strictEqual(testModel2From2, testModel2);
+  })
+
   it ('should life-cycle collectionWillUpdateChildren call success', (done) => {
     class WillUpdateChildrenTestCollection extends Collection {
       static Model = InitialAttributesModel;

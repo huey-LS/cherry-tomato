@@ -4,50 +4,29 @@ import {
 } from 'react';
 
 import {
-  Model,
-  Collection
+  Model
 } from '@cherry-tomato/core';
 
+import autoObserve, { ObserveOptions } from './auto-observe';
 
-interface ObserveOptions {
-  autoUpdateEvents?: AutoUpdateEvents
-}
-
-interface AutoUpdateEventNameCreator {
-  (model: any, key?: string): string[];
-}
-type AutoUpdateEvents = string[] | AutoUpdateEventNameCreator;
-
-export default function useCherryTomato (model: Model, options:ObserveOptions = {}) {
-  let autoUpdateEvents = options.autoUpdateEvents;
+export default function useCherryTomato (model: Model, options?:ObserveOptions ) {
   const [, updateState] = useState();
-  let currentUpdateEvents: string[] = [];
-  if (!autoUpdateEvents) {
-    if (Collection.isCollection(model)) {
-      currentUpdateEvents = [
-        'modelDidUpdate',
-        'collectionDidUpdateChildren'
-      ]
-    } else if (Model.isModel(model)) {
-      currentUpdateEvents = [
-        'modelDidUpdate'
-      ]
-    }
-  } else if (typeof autoUpdateEvents === 'function') {
-    currentUpdateEvents = autoUpdateEvents(model);
-  } else {
-    currentUpdateEvents = autoUpdateEvents;
-  }
+
   useEffect(() => {
-    let removeListeners = currentUpdateEvents.map((eventName) => {
-      return model.addListener(eventName as any, () => {
-        updateState({});
-      })
-    })
+    let isSubscribed = true;
+    let removeListener = autoObserve(
+      model,
+      () => {
+        if (isSubscribed) {
+          updateState({});
+        }
+      },
+      options
+    );
+
     return () => {
-      removeListeners.forEach((removeListener) => {
-        removeListener();
-      });
+      isSubscribed = false;
+      removeListener();
     }
   })
 }
