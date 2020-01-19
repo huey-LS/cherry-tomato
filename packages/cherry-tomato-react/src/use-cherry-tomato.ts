@@ -9,7 +9,7 @@ import {
 
 import autoObserve, { ObserveOptions } from './auto-observe';
 
-export default function useCherryTomato (model: Model, options?:ObserveOptions ) {
+export default function useCherryTomato (model: Model, options: UseCherryTomatoOptions = {}) {
   const [, updateState] = useState();
 
   useEffect(() => {
@@ -24,9 +24,22 @@ export default function useCherryTomato (model: Model, options?:ObserveOptions )
       options
     );
 
+    if (options.updateOnMount) {
+      updateState({});
+    }
+
     return () => {
       isSubscribed = false;
       removeListener();
     }
   }, [model]);
+}
+
+interface UseCherryTomatoOptions extends ObserveOptions {
+  /**
+   * @params updateFirstRender
+   * react useEffect hooks 不是在函数施行时or执行后立刻执行的，是在挂载后才第一次执行，中间可能存在被插入意外更新的可能
+   * 如果 model可能在其他地方被更新，建议设置 updateOnMount: true 来更新一次，保证数据的正确性
+   * */
+  updateOnMount?: boolean
 }
