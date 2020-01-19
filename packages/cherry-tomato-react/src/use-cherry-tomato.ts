@@ -28,5 +28,5 @@ export default function useCherryTomato (model: Model, options?:ObserveOptions )
       isSubscribed = false;
       removeListener();
     }
-  })
+  }, [model]);
 }
