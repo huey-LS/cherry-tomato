@@ -6,7 +6,7 @@
   "scripts": {
     "setup": "lerna link && lerna bootstrap",
     "build": "lerna run build",
-    "start": "lerna run start"
+    "test": "lerna run test"
   },
   "author": "huey.LS",
   "license": "MIT",
