@@ -62,7 +62,7 @@ export default class Model<ModelEvents extends CommonModelEventConfig = CommonMo
     if (typeof initialAttributesCreator === 'function') {
       initialAttributes = initialAttributesCreator();
     }
-    this._attributes = new Attributes(Object.assign({}, initialAttributes, attributes));
+    this._attributes = new Attributes({ ...initialAttributes, ...attributes });
     var keyCreator = constructor.key || defaultKeyCreator;
 
     if (typeof keyCreator === 'function') {

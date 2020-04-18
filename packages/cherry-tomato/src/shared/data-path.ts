@@ -70,7 +70,7 @@ export function getNewParentPathData (
   if (Array.isArray(data)) {
     newProperties = data.slice(0);
   } else {
-    newProperties = Object.assign({}, data);
+    newProperties = { ...data };
   }
   let current = newProperties;
   let key;
@@ -95,7 +95,7 @@ export function getNewParentPathData (
     if (Array.isArray(oldNextValue)) {
       next = oldNextValue.slice(0);
     } else if ('object' === typeof oldNextValue ) {
-      next = Object.assign({}, oldNextValue);
+      next = { ...oldNextValue };
     } else if ('undefined' === typeof oldNextValue) {
       next = {};
     } else {

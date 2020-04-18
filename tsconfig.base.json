@@ -14,7 +14,9 @@
     "sourceMap": true,
     "lib": [
       "ESNext",
-      "DOM"
+      "DOM",
+      "ES5",
+      "ES6"
     ]
   }
 }

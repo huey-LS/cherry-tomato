@@ -25,7 +25,7 @@ const serialize = createThunkAttributeDecorator<undefined|string|{
   if (!Object.getOwnPropertyDescriptor(target, MAPS_KEY)) {
     let originSerializeMaps = {};
     if (target[MAPS_KEY]) {
-      Object.assign(originSerializeMaps, target[MAPS_KEY]);
+      originSerializeMaps = { ...originSerializeMaps, ...target[MAPS_KEY]};
     }
     Object.defineProperty(target, MAPS_KEY, {
       configurable: true,

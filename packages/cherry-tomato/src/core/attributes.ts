@@ -51,7 +51,7 @@ export default class Attributes {
   }
 
   merge (newData: any) {
-    let newProperties = Object.assign({}, this._attributes, newData);
+    let newProperties = { ...this._attributes, ...newData };
     return new Attributes(newProperties);
   }
 
