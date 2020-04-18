@@ -29,5 +29,8 @@
     "ts-node": "^8.4.1",
     "typescript": "^3.6.4"
   },
-  "gitHead": "7a7544ac5de35919e2177f8abcb725bde865ff1a"
+  "gitHead": "7a7544ac5de35919e2177f8abcb725bde865ff1a",
+  "dependencies": {
+    "core-js": "^3.6.5"
+  }
 }
