@@ -65,7 +65,7 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
         )
   };
 
-  static Model: typeof Model;
+  static Model: (typeof Model)|((data: any) => Model);
 
   static isChildModel?: (model: any) => boolean;
 
@@ -275,7 +275,7 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
     if (this._isChildModel(item)) {
       current = item;
     } else {
-      current = new this._Model(item) as ModelClass;
+      current = new (this._Model as any)(item) as ModelClass;
     }
 
     return current;
