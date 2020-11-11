@@ -75,7 +75,6 @@ const serialize = createThunkAttributeDecorator<string|{
           newValue = writableType(newValue);
         }
 
-        console.log(name, newValue, this.get(name));
         this.set(name, newValue);
       }
 
