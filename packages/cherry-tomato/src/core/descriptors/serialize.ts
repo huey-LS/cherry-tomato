@@ -52,6 +52,14 @@ const serialize = createThunkAttributeDecorator<string|{
     oldGetter = descriptor.get;
 
     descriptor.enumerable = true;
+
+    if (
+      (descriptor as any).initializer !== void 0 &&
+      !(descriptor as any).initializer
+    ) {
+      (descriptor as any).initializer = void 0;
+    }
+
     descriptor.get = function () {
       let defaultValue = oldGetter && oldGetter.call(this);
       let value;

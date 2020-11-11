@@ -115,10 +115,24 @@ describe('serialized', function () {
   it ('should attribute update when Instantiate', () => {
     var model2 = new InitialAttributesModel({
       count: 10,
-      text: 'c'
+      text: 'c',
+      text2: 'c2'
     });
     assert.strictEqual(10, model2.count);
     assert.strictEqual('c', model2.text);
+    // assert.strictEqual('c2', model2.text2);
+    model2.set('text', 'd');
+    model2.set('text2', 'd2');
+    assert.strictEqual('d', model2.text);
+    assert.strictEqual('d2', model2.text2);
+    assert.strictEqual('d', model2.get('text'));
+    assert.strictEqual('d2', model2.get('text2'));
+    model2.text = 'e';
+    model2.text2 = 'e2';
+    assert.strictEqual('e', model2.text);
+    assert.strictEqual('e2', model2.text2);
+    assert.strictEqual('e', model2.get('text'));
+    assert.strictEqual('e2', model2.get('text2'));
   })
 
   it ('should serialize don\'t interact with different model', () => {
