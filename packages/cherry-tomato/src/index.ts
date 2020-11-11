@@ -5,6 +5,8 @@ import * as KeyCreators from './core/key-creators';
 import connect from './core/descriptors/connect';
 import serialize, { output } from './core/descriptors/serialize';
 
+const attribute = serialize;
+
 export {
   Model,
   Collection,
@@ -12,5 +14,6 @@ export {
   KeyCreators,
   connect,
   serialize,
+  attribute,
   output
 }

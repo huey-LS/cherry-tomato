@@ -8,12 +8,19 @@ import {
 
 class InitialAttributesModel extends Model {
   static initialAttributes = () => ({
-    count: 1
+    count: 1,
+    text: 'a'
   })
 
-  @serialize('count')
+  @serialize()
   get count () { return 0;}
   set count (arg) {}
+
+  @serialize()
+  text!: string;
+
+  @serialize()
+  text2 = 'b2';
 
 
   @serialize({
@@ -48,9 +55,7 @@ class TestModel extends Model {
     count2: 2
   })
 
-  @serialize({
-    name: 'count2'
-  })
+  @serialize('count2')
   get count () { return 0;}
 
   @output({})
@@ -66,6 +71,7 @@ describe('serialized', function () {
 
   it ('should get serialized attribute success', () => {
     assert.strictEqual(1, model.count);
+    assert.strictEqual('a', model.text);
   })
 
   it ('should get default serialized attribute success', () => {
@@ -96,6 +102,23 @@ describe('serialized', function () {
       2,
       model.differentKey
     );
+  })
+
+  it ('should update count by init success', () => {
+    model.text = 'abc';
+    assert.strictEqual(
+      'abc',
+      model.text
+    );
+  })
+
+  it ('should attribute update when Instantiate', () => {
+    var model2 = new InitialAttributesModel({
+      count: 10,
+      text: 'c'
+    });
+    assert.strictEqual(10, model2.count);
+    assert.strictEqual('c', model2.text);
   })
 
   it ('should serialize don\'t interact with different model', () => {

@@ -5,15 +5,15 @@ import {
 import Model from '../model';
 
 
-const serialize = createThunkAttributeDecorator<undefined|string|{
+const serialize = createThunkAttributeDecorator<string|{
   name: string,
   type?: Function,
   writableType?: Function
 }>(function (
-  options,
   target,
   key,
-  descriptor
+  descriptor,
+  options
 ) {
   let name: string;
   let type: Function|undefined;
@@ -51,41 +51,38 @@ const serialize = createThunkAttributeDecorator<undefined|string|{
     oldSetter = descriptor.set;
     oldGetter = descriptor.get;
 
-    // console.log(descriptor, oldGetter);
-    if (oldGetter) {
-      descriptor.enumerable = true;
-      descriptor.get = function () {
-        let defaultValue = oldGetter && oldGetter.call(this);
-        let value;
-        if (Model.isModel(this)) {
-          value = this.get(name);
-          if (type) {
-            value = type(value);
-          } else if (typeof value === 'undefined'){
-            value = defaultValue;
-          }
-        } else {
+    descriptor.enumerable = true;
+    descriptor.get = function () {
+      let defaultValue = oldGetter && oldGetter.call(this);
+      let value;
+      if (Model.isModel(this)) {
+        value = this.get(name);
+        if (type) {
+          value = type(value);
+        } else if (typeof value === 'undefined'){
           value = defaultValue;
         }
-
-        return value;
+      } else {
+        value = defaultValue;
       }
+
+      return value;
     }
 
-    if (oldSetter) {
-      descriptor.set = function (newValue: any) {
-        if (Model.isModel(this)) {
-          if (writableType) {
-            newValue = writableType(newValue);
-          }
-          this.set(name, newValue);
+    descriptor.set = function (newValue: any) {
+      if (Model.isModel(this)) {
+        if (writableType) {
+          newValue = writableType(newValue);
         }
 
+        console.log(name, newValue, this.get(name));
+        this.set(name, newValue);
+      }
+
+      if (oldSetter) {
         oldSetter.call(this, newValue)
       }
     }
-
-    // delete descriptor.writable;
 
     serializeMaps[key] = name;
   }
@@ -96,10 +93,10 @@ export default serialize;
 
 
 const output = createThunkAttributeDecorator<any>(function (
-  options,
   target,
   key,
-  descriptor
+  descriptor,
+  options
 ) {
 
   if (descriptor) {

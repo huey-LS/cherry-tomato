@@ -16,10 +16,10 @@ interface ConnectThunkDecorator {
 }
 
 let connect =  createThunkAttributeDecorator<ConnectOptions>(function (
-  options = {},
   target,
   key,
-  descriptor
+  descriptor,
+  options = {}
 ) {
   if (descriptor && Model.isModel(target)) {
     let dataKey = Symbol();

@@ -30,10 +30,10 @@ export const mixinFunctionFromArray = (
 
 interface ThunkAttributeDecorator<OptionsType> {
   (
-    options: OptionsType,
     target: any,
     key: string,
-    descriptor?: PropertyDescriptor
+    descriptor?: PropertyDescriptor,
+    options?: OptionsType
   ): void;
 }
 
@@ -43,7 +43,7 @@ export function createThunkAttributeDecorator<
   callback: ThunkAttributeDecorator<OptionsType>
 ) {
   return function (
-    options: OptionsType
+    options?: OptionsType
   ) {
     return function (
       target: any,
@@ -51,7 +51,7 @@ export function createThunkAttributeDecorator<
       descriptor?: PropertyDescriptor
     ): any {
       return mixinDescriptor<OptionsType>(
-        callback, options, target, key, descriptor
+        callback, target, key, descriptor, options
       );
     }
   }
@@ -59,10 +59,10 @@ export function createThunkAttributeDecorator<
 
 function mixinDescriptor<OptionsType> (
   callback: ThunkAttributeDecorator<OptionsType>,
-  options: OptionsType,
   target: any,
   key: string,
-  descriptor?: PropertyDescriptor
+  descriptor?: PropertyDescriptor,
+  options?: OptionsType
 ) {
   if (!descriptor) {
     descriptor = Object.create(null) as PropertyDescriptor;
@@ -71,10 +71,10 @@ function mixinDescriptor<OptionsType> (
 
   const newValue = callback.call(
     target,
-    options,
     target,
     key,
-    descriptor
+    descriptor,
+    options
   )
 
   if (typeof newValue !== 'undefined') {

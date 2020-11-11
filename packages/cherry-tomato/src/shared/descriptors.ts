@@ -5,10 +5,10 @@ import {
 export const enumerable = createThunkAttributeDecorator<
   boolean
 >(function (
-  isEnumerable,
   target,
   key,
-  descriptor
+  descriptor,
+  isEnumerable
 ) {
   if (descriptor) {
     descriptor.enumerable = isEnumerable;
@@ -19,10 +19,10 @@ export const enumerable = createThunkAttributeDecorator<
 export const writable = createThunkAttributeDecorator<
   boolean
 >(function (
-  isWritable,
   target,
   key,
-  descriptor
+  descriptor,
+  isWritable
 ) {
   if (descriptor) {
     descriptor.writable = isWritable;
