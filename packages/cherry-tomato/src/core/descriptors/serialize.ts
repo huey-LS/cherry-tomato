@@ -6,9 +6,10 @@ import Model from '../model';
 
 
 const serialize = createThunkAttributeDecorator<string|{
-  name: string,
+  name?: string,
   type?: Function,
-  writableType?: Function
+  writeType?: Function,
+  writable?: boolean
 }>(function (
   target,
   key,
@@ -17,7 +18,8 @@ const serialize = createThunkAttributeDecorator<string|{
 ) {
   let name: string;
   let type: Function|undefined;
-  let writableType: Function|undefined;
+  let writeType: Function|undefined;
+  let writable: boolean = true;
   let oldSetter: any;
   let oldGetter: any;
 
@@ -41,9 +43,10 @@ const serialize = createThunkAttributeDecorator<string|{
   } else if (typeof options === 'string') {
     name = options;
   } else {
-    name = options.name;
+    name = options.name || key;
     type = options.type;
-    writableType = options.writableType;
+    writeType = options.writeType;
+    writable = options.writable === void 0 ? true : false;
   }
 
 
@@ -77,10 +80,12 @@ const serialize = createThunkAttributeDecorator<string|{
       return value;
     }
 
+    delete descriptor.value;
+
     descriptor.set = function (newValue: any) {
-      if (Model.isModel(this)) {
-        if (writableType) {
-          newValue = writableType(newValue);
+      if (Model.isModel(this) && writable) {
+        if (writeType) {
+          newValue = writeType(newValue);
         }
         if (typeof newValue !== 'undefined') {
           this.set(name, newValue);
@@ -91,6 +96,8 @@ const serialize = createThunkAttributeDecorator<string|{
         oldSetter.call(this, newValue)
       }
     }
+
+    delete descriptor.writable;
 
     serializeMaps[key] = name;
   }
