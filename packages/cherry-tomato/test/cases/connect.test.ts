@@ -1,5 +1,3 @@
-import assert from 'assert';
-
 import {
   Model,
   connect
@@ -25,17 +23,19 @@ class InitialModel extends Model {
 describe('connect model', function () {
   var model = new InitialModel();
 
-  it ('should get connectedModel success', () => {
-    assert.strictEqual(
-      model._connectedModel instanceof ConnectedModel,
+  test('should get connectedModel success', () => {
+    expect(
+      model._connectedModel instanceof ConnectedModel
+    ).toBe(
       true
     )
   })
 
-  it ('should auto update after connectedModel update success', () => {
+  test('should auto update after connectedModel update success', () => {
     model._connectedModel.set('count', 2);
-    assert.strictEqual(
-      model.get('connectedCount'),
+    expect(
+      model.get('connectedCount')
+    ).toBe(
       2
     )
   })

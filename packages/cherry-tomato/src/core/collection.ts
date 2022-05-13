@@ -1,14 +1,3 @@
-import 'core-js/stable/array/for-each';
-import 'core-js/stable/array/map';
-import 'core-js/stable/array/reduce';
-import 'core-js/stable/array/reduce-right';
-import 'core-js/stable/array/filter';
-import 'core-js/stable/array/find';
-import 'core-js/stable/array/find-index';
-import 'core-js/stable/array/some';
-import 'core-js/stable/array/every';
-import 'core-js/stable/array/includes';
-
 import Model, {
   CommonModelEventConfig
 } from './model';

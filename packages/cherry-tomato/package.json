@@ -8,12 +8,10 @@
     "lib"
   ],
   "scripts": {
-    "clean": "rm -fr lib",
-    "build": "npm run clean && tsc",
-    "dev": "npm run clean && tsc -w",
-    "test": "mocha --require ts-node/register --noEmit -P tsconfig.test.json --watch-extensions ts",
-    "nyc": "nyc npm run test",
-    "prepare": "npm run build"
+    "clean": "rimraf lib",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build",
+    "test": "jest --collect-coverage"
   },
   "author": "huey.LS",
   "repository": {
@@ -22,15 +20,13 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@istanbuljs/nyc-config-typescript": "^0.1.3",
-    "@types/mocha": "^5.2.7",
-    "mocha": "^6.2.2",
-    "nyc": "^14.1.1",
-    "ts-node": "^8.4.1",
-    "typescript": "^3.6.4"
-  },
-  "gitHead": "7a7544ac5de35919e2177f8abcb725bde865ff1a",
-  "dependencies": {
-    "core-js": "^3.6.5"
+    "@babel/core": "^7.17.10",
+    "@babel/preset-env": "^7.17.10",
+    "@babel/preset-typescript": "^7.16.7",
+    "@types/jest": "^27.5.0",
+    "jest": "^28.1.0",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^28.0.2",
+    "typescript": "^4.6.4"
   }
 }

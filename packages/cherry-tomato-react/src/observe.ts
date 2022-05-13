@@ -1,6 +1,5 @@
 import {
-  Model,
-  Collection
+  Model
 } from '@cherry-tomato/core';
 
 import autoObserve, { ObserveOptions } from './auto-observe';

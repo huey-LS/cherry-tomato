@@ -11,11 +11,18 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "sourceMap": true,
+    "sourceMap": false,
+    "baseUrl": ".",
+    "rootDir": "src",
+    "outDir": "lib",
     "lib": [
       "ESNext",
       "DOM"
-    ],
-    "outDir": "lib"
-  }
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "lib",
+    "test"
+  ]
 }

@@ -32,6 +32,7 @@ export interface CommonModelEventConfig extends CommonEventConfig {
   [MODEL_DID_UPDATE]: TypedEventCallback<ModelUpdateEvent>
 }
 
+
 export default class Model<ModelEvents extends CommonModelEventConfig = CommonModelEventConfig> extends EventEmitter<ModelEvents> {
   static isModel = function (obj: any): obj is Model {
     return obj &&
@@ -39,6 +40,17 @@ export default class Model<ModelEvents extends CommonModelEventConfig = CommonMo
         obj instanceof Model
         || obj.__cherry_tomato_model
       )
+  }
+
+  static isInstance = function isInstance<
+    T extends typeof Model = typeof Model
+  > (
+    this: T,
+    obj: any
+  ): obj is InstanceType<T> {
+    return (
+      obj instanceof this
+    )
   }
 
   static initialAttributes: () => any;

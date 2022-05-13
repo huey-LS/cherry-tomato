@@ -10,19 +10,19 @@ export const mixinFunctionFromArray = (
 ) => (target: any) => {
   if (Array.isArray(map) && 'function' === typeof transform) {
     map.forEach((key) => {
-      if('function' === typeof (Array.prototype as any)[key]) {
-        Object.defineProperty(target.prototype, key, {
-          value: function (
-            ...args: any[]
-          ) {
-            let currentTarget = transform(this);
-            return currentTarget && currentTarget[key] && currentTarget[key](...args)
-          },
-          writable: true,
-          enumerable: false,
-          configurable: true
-        });
-      }
+      Object.defineProperty(target.prototype, key, {
+        value: function (
+          ...args: any[]
+        ) {
+          let currentTarget = transform(this);
+          if('function' === typeof (Array.prototype as any)[key]) {
+            return (Array.prototype as any)[key].call(currentTarget, ...args);
+          }
+        },
+        writable: false,
+        enumerable: false,
+        configurable: true
+      });
     })
   }
   return target;
