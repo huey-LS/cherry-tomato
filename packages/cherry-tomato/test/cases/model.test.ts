@@ -19,6 +19,12 @@ class AutoKeyModel extends Model {
 
 describe('Model', function () {
   var model = new InitialAttributesModel();
+  test('should isInstance success', () => {
+    expect(
+      InitialAttributesModel.isInstance(model)
+    ).toBe(true);
+  })
+
   test('should get initialAttributes success', () => {
     expect(model.get('count')).toBe(1);
   })
