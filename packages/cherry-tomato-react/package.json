@@ -1,6 +1,6 @@
 {
   "name": "@cherry-tomato/react",
-  "version": "2.0.7",
+  "version": "2.1.0",
   "description": "",
   "main": "lib/index.js",
   "files": [
@@ -23,7 +23,7 @@
     "typescript": "^4.6.4"
   },
   "dependencies": {
-    "@cherry-tomato/core": "^2.0.6",
+    "@cherry-tomato/core": "^2.1.0",
     "@types/react": "^16.9.15",
     "react": "^16.3.2"
   }
