@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 2.1.1
+
+### Patch Changes
+
+- c41cd27: ts 构建使用 react 作为 jsx 配置，target 改为 es5 以提供更多兼容
+
 ## 2.1.0
 
 ### Minor Changes
