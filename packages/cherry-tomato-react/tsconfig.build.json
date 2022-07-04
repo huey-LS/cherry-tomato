@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es5",
     "module": "CommonJS",
-    "jsx": "preserve",
+    "jsx": "react",
     "strict": true,
     "declaration": true,
     "moduleResolution": "node",
