@@ -5,21 +5,15 @@ import Attributes from './attributes';
 import {
   Event,
   TypedEventCallback,
-  CommonEventConfig
+  EventConfig
 } from './event-emitter';
 import {
-  MODEL_WILL_UPDATE,
   MODEL_DID_UPDATE,
   COLLECTION_WILL_UPDATE_CHILDREN,
   COLLECTION_DID_UPDATE_CHILDREN,
   COLLECTION_CHILD_DID_UPDATE
 } from '../constants/life-cycle';
-import {
-  enumerable,
-  writable
-} from '../shared/descriptors';
 import { respond } from '../shared/spread';
-import { mixinFunctionFromArray } from '../shared/utils';
 
 
 type prevChildren<ModelClass> = ModelClass[];
@@ -36,16 +30,15 @@ export interface CommonCollectionEventConfig<ModelClass> extends CommonModelEven
   [COLLECTION_DID_UPDATE_CHILDREN]: TypedEventCallback<CollectionUpdateChildrenEvent<ModelClass>>
 }
 
-const transformFromArrayMap = [
-  'forEach', 'map', 'reduce', 'reduceRight',
-  'slice', 'filter', 'find', 'findIndex', 'some', 'every', 'includes', 'indexOf'
-];
-
-@mixinFunctionFromArray(
-  transformFromArrayMap,
-  (target: any) => target._children
-)
-export default class Collection<ModelClass extends Model = Model, CollectionEventConfig extends CommonCollectionEventConfig<ModelClass> = CommonCollectionEventConfig<ModelClass>> extends Model<CollectionEventConfig> {
+// @mixinFunctionFromArray(
+//   transformFromArrayMap,
+//   (target: any) => target._children
+// )
+class Collection<
+CM extends Model = Model,
+CCE extends EventConfig<never> = {},
+CollectionEvents extends EventConfig<never> = CCE & CommonCollectionEventConfig<CM>
+> extends Model<CollectionEvents> {
   static isCollection = function (obj: any): obj is Collection {
     return obj &&
         (
@@ -54,7 +47,7 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
         )
   };
 
-  static Model: (typeof Model)|((data: any) => Model);
+  static Model: (typeof Model<any>)|(() => Model<any>);
 
   static isChildModel?: (model: any) => boolean;
 
@@ -62,26 +55,18 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
 
   readonly __cherry_tomato_collection = true;
 
-
-  @enumerable(false)
   get _Model () {
     const constructor = this.constructor as typeof Collection;
     return constructor.Model;
   }
 
-  @enumerable(false)
   get _isChildModel () {
     const constructor = this.constructor as typeof Collection;
     return constructor.isChildModel || ((model) => (model instanceof this._Model));
   }
 
-  @enumerable(false)
-  @writable(true)
-  _children: ModelClass[] = [];
+  _children: CM[] = [];
 
-
-  @enumerable(false)
-  @writable(true)
   _childListener = (event: Event) => {
     if (
       ~[
@@ -98,21 +83,66 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
     }
   }
 
-  // transformFromArrayMap
-  forEach!: Array<ModelClass>["forEach"];
-  map!: Array<ModelClass>["map"];
-  reduce!: Array<ModelClass>["reduce"];
-  reduceRight!: Array<ModelClass>["reduceRight"];
-  slice!: Array<ModelClass>["slice"];
-  filter!: Array<ModelClass>["filter"];
-  find!: Array<ModelClass>["find"];
-  findIndex!: Array<ModelClass>["findIndex"];
-  some!: Array<ModelClass>["some"];
-  every!: Array<ModelClass>["every"];
-  includes!: Array<ModelClass>["includes"];
-  indexOf!: Array<ModelClass>["indexOf"];
+  callFromArray<ArrayMethod extends keyof typeof Array.prototype> (
+    method: ArrayMethod,
+    ...args: Parameters<typeof Array.prototype[ArrayMethod]>
+  ) {
+    return Array.prototype[method].call(this.getChildren(), ...args);
+  }
 
-  merge (...args: Collection<ModelClass>[]) {
+  // transformFromArrayMap
+  forEach (...args: Parameters<Array<CM>["forEach"]>) {
+    return this.callFromArray('forEach', ...args);
+  }
+  map (...args: Parameters<Array<CM>["map"]>) {
+    return this.callFromArray('map', ...args);
+  }
+  reduce (...args: Parameters<Array<CM>["reduce"]>) {
+    return this.callFromArray('reduce', ...args);
+  }
+  reduceRight (...args: Parameters<Array<CM>["reduceRight"]>) {
+    return this.callFromArray('reduceRight', ...args);
+  }
+  find (...args: Parameters<Array<CM>["find"]>) {
+    return this.callFromArray('find', ...args);
+  }
+  findIndex (...args: Parameters<Array<CM>["findIndex"]>) {
+    return this.callFromArray('findIndex', ...args);
+  }
+  some (...args: Parameters<Array<CM>["some"]>) {
+    return this.callFromArray('some', ...args);
+  }
+  every (...args: Parameters<Array<CM>["every"]>) {
+    return this.callFromArray('every', ...args);
+  }
+  includes (...args: Parameters<Array<CM>["includes"]>) {
+    return this.callFromArray('includes', ...args);
+  }
+  indexOf (...args: Parameters<Array<CM>["indexOf"]>) {
+    return this.callFromArray('indexOf', ...args);
+  }
+
+  filter (...args: Parameters<Array<CM>["filter"]>) {
+    const newChildren = this.callFromArray('filter', ...args);
+    const constructor = this.constructor as typeof Collection;
+    let newCollection = new constructor();
+    newCollection.resetChildren(
+      newChildren
+    );
+    return newCollection;
+  }
+
+  slice (...args: Parameters<Array<CM>["slice"]>) {
+    const newChildren = this.callFromArray('slice', ...args);
+    const constructor = this.constructor as typeof Collection;
+    let newCollection = new constructor();
+    newCollection.resetChildren(
+      newChildren
+    );
+    return newCollection;
+  }
+
+  merge (...args: Collection<CM>[]) {
     const constructor = this.constructor as typeof Collection;
     if (
       args.some((collection) => {
@@ -126,7 +156,7 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
     );
   }
 
-  concat (...args: Collection<ModelClass>[]) {
+  concat (...args: Collection<CM>[]) {
     const constructor = this.constructor as typeof Collection;
     if (
       args.some((collection) => {
@@ -143,11 +173,11 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
   }
 
   // before children change
-  [COLLECTION_WILL_UPDATE_CHILDREN] (prevChildren: ModelClass[], nextChildren: ModelClass[]) {}
+  [COLLECTION_WILL_UPDATE_CHILDREN] (prevChildren: CM[], nextChildren: CM[]) {}
   // after children change
-  [COLLECTION_DID_UPDATE_CHILDREN] (prevChildren: ModelClass[], nextChildren: ModelClass[]) {}
+  [COLLECTION_DID_UPDATE_CHILDREN] (prevChildren: CM[], nextChildren: CM[]) {}
   // after one child change
-  [COLLECTION_CHILD_DID_UPDATE] (model: ModelClass, prevAttributes: Attributes) {}
+  [COLLECTION_CHILD_DID_UPDATE] (model: CM, prevAttributes: Attributes) {}
 
   clone () {
     const newThis = super.clone.call(this);
@@ -174,7 +204,6 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
   }
 
 
-  @enumerable(false)
   get length () {
     return this._children.length;
   }
@@ -183,7 +212,7 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
     return this._children.slice(0);
   }
 
-  addChild (item: ModelClass|any) {
+  addChild (item: CM|any) {
     this._addChild(
       this._createModal(item)
     );
@@ -197,7 +226,7 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
     return this;
   }
 
-  resetChildren (items:  (ModelClass|any)[]) {
+  resetChildren (items:  (CM|any)[]) {
     this._resetChild(
       items.map((item) => (
         this._createModal(item)
@@ -212,7 +241,7 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
     this._children = [];
   }
 
-  _addChild (newChild: ModelClass) {
+  _addChild (newChild: CM) {
     const prevChildren = this._children;
     const nextChildren = [
       ...prevChildren,
@@ -237,7 +266,7 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
     return this;
   }
 
-  _resetChild (nextChildren: ModelClass[]) {
+  _resetChild (nextChildren: CM[]) {
     const prevChildren = this._children;
     respond(COLLECTION_WILL_UPDATE_CHILDREN, this, [prevChildren, nextChildren]);
     this._unsubscribeChildren();
@@ -260,13 +289,15 @@ export default class Collection<ModelClass extends Model = Model, CollectionEven
   }
 
   _createModal (item: any) {
-    let current: ModelClass;
+    let current: CM;
     if (this._isChildModel(item)) {
       current = item;
     } else {
-      current = new (this._Model as any)(item) as ModelClass;
+      current = new (this._Model as any)(item) as CM;
     }
 
     return current;
   }
 }
+
+export default Collection;

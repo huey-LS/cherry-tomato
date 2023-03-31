@@ -2,10 +2,6 @@ import {
   getPathData,
   getNewParentPathData
 } from '../shared/data-path';
-import {
-  enumerable,
-  writable
-} from '../shared/descriptors';
 
 /**
  * @export
@@ -23,8 +19,6 @@ export default class Attributes {
 
   readonly __cherry_tomato_attributes = true;
 
-  @enumerable(false)
-  @writable(true)
   _attributes: Object;
 
   constructor (data = {}) {

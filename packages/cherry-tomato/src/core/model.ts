@@ -2,16 +2,12 @@ import Attributes from './attributes';
 import EventEmitter, {
   Event,
   TypedEventCallback,
-  CommonEventConfig
+  EventConfig
 } from './event-emitter';
 import {
   MODEL_DID_UPDATE,
   MODEL_WILL_UPDATE
  } from '../constants/life-cycle';
-import {
-  enumerable,
-  writable
-} from '../shared/descriptors';
 import { respond } from '../shared/spread';
 import {
   KeyCreator,
@@ -27,13 +23,18 @@ interface ModelUpdateEvent extends Event {
   data: [prevAttributes, nextAttributes]
 }
 
-export interface CommonModelEventConfig extends CommonEventConfig {
-  [MODEL_WILL_UPDATE]: TypedEventCallback<ModelUpdateEvent>,
-  [MODEL_DID_UPDATE]: TypedEventCallback<ModelUpdateEvent>
+export interface CommonModelEventConfig extends EventConfig<
+  typeof MODEL_WILL_UPDATE | typeof MODEL_DID_UPDATE
+> {
+  [MODEL_WILL_UPDATE]: TypedEventCallback<ModelUpdateEvent>;
+  [MODEL_DID_UPDATE]: TypedEventCallback<ModelUpdateEvent>;
 }
 
 
-export default class Model<ModelEvents extends CommonModelEventConfig = CommonModelEventConfig> extends EventEmitter<ModelEvents> {
+export default class Model<
+CME extends EventConfig<never> = {},
+ModelEvents extends EventConfig<never> = CME & CommonModelEventConfig
+> extends EventEmitter<ModelEvents> {
   static isModel = function (obj: any): obj is Model {
     return obj &&
       (
@@ -43,7 +44,7 @@ export default class Model<ModelEvents extends CommonModelEventConfig = CommonMo
   }
 
   static isInstance = function isInstance<
-    T extends typeof Model = typeof Model
+    T extends typeof Model<any>
   > (
     this: T,
     obj: any
@@ -58,8 +59,8 @@ export default class Model<ModelEvents extends CommonModelEventConfig = CommonMo
 
   readonly __cherry_tomato_model = true;
 
-  @enumerable(false)
-  @writable(true)
+  // @enumerable(false)
+  // @writable(true)
   _attributes: Attributes;
 
   key!: string;

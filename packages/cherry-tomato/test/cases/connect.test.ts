@@ -1,22 +1,18 @@
 import {
   Model,
-  connect
+  connect,
+  attribute
 } from '../../src/index';
 
 
 class ConnectedModel extends Model {
-  static initialAttributes = () => ({
-    count: 1
-  })
+  @attribute()
+  count = 1;
 }
 
 class InitialModel extends Model {
-  @connect<InitialModel, ConnectedModel>({
-    modelDidUpdate: function (self, connectedModel) {
-      self.set('connectedCount', connectedModel.get('count'));
-    }
-  })
-  _connectedModel = new ConnectedModel();
+  @connect()
+  connected = new ConnectedModel();
 }
 
 
@@ -25,18 +21,25 @@ describe('connect model', function () {
 
   test('should get connectedModel success', () => {
     expect(
-      model._connectedModel instanceof ConnectedModel
+      model.connected instanceof ConnectedModel
     ).toBe(
       true
     )
   })
 
   test('should auto update after connectedModel update success', () => {
-    model._connectedModel.set('count', 2);
-    expect(
-      model.get('connectedCount')
-    ).toBe(
-      2
-    )
+    expect(model.connected.count).toBe(1);
+    expect(model.get('connected')).toEqual({ count: 1 });
+    model.connected.count = 2;
+    expect(model.connected.count).toBe(2);
+    expect(model.get('connected')).toEqual({ count: 2 });
+  })
+
+  test('should auto update connectedModel after model update success', () => {
+    expect(model.connected.count).toBe(2);
+    // expect(model.get('connected')).toEqual({ count: 2 });
+    model.set('connected', { count: 3 });
+    expect(model.connected.count).toBe(3);
+    expect(model.get('connected')).toEqual({ count: 3 });
   })
 })

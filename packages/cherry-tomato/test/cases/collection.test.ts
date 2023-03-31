@@ -1,16 +1,16 @@
 import {
   Model,
-  Collection
+  Collection,
+  attribute
 } from '../../src/index';
 
 
 class InitialAttributesModel extends Model {
-  static initialAttributes = () => ({
-    count: 1
-  })
+  @attribute()
+  count = 1;
 }
 
-class TestCollection extends Collection {
+class TestCollection extends Collection<InitialAttributesModel> {
   static Model = InitialAttributesModel;
 }
 

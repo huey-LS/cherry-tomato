@@ -5,10 +5,6 @@ import {
   WILL_DESTROY,
   DID_DESTROY
 } from '../constants/life-cycle';
-import {
-  enumerable,
-  writable
-} from '../shared/descriptors';
 
 export class Event {
   data: any;
@@ -36,16 +32,31 @@ export interface TypedEventCallback<TypedEvent extends Event = Event> {
   (event: TypedEvent): void;
 }
 
-export interface CommonEventConfig {
+
+export type EventConfig<Events extends string> = {
+  [E in Events]: TypedEventCallback;
+}
+
+
+export interface CommonEventConfig extends EventConfig<
+typeof WILL_DESTROY | typeof DID_DESTROY
+>{
   [WILL_DESTROY]: TypedEventCallback,
   [DID_DESTROY]: TypedEventCallback
 }
+
+// export interface EventConfig {
+//   [type: string]: TypedEventCallback,
+// }
 
 interface EventCallbacksByType {
   [type: string]: TypedEventCallback[];
 }
 
-export default class EventEmitter<EventsConfig extends CommonEventConfig = CommonEventConfig> {
+export default class EventEmitter<
+CE extends EventConfig<never> = {},
+EventsConfig = CE & CommonEventConfig
+> {
   static isEvent = function (obj: any): obj is EventEmitter {
     return obj &&
       (
@@ -56,16 +67,10 @@ export default class EventEmitter<EventsConfig extends CommonEventConfig = Commo
 
   readonly __cherry_tomato_event = true;
 
-  @enumerable(false)
-  @writable(true)
   _events: EventCallbacksByType;
 
-  @enumerable(false)
-  @writable(true)
   _all_events: TypedEventCallback[]
 
-  @enumerable(false)
-  @writable(true)
   _destroyed: boolean;
 
   constructor () {

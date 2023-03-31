@@ -1,19 +1,21 @@
 import Model from './core/model';
 import Collection from './core/collection';
-import EventEmitter from './core/event-emitter';
+import EventEmitter, {
+  EventConfig,
+  TypedEventCallback
+} from './core/event-emitter';
 import * as KeyCreators from './core/key-creators';
-import connect from './core/descriptors/connect';
-import serialize, { output } from './core/descriptors/serialize';
+import { connect } from './core/descriptors/connect';
+import { attribute } from './core/descriptors/attribute';
 
-const attribute = serialize;
 
 export {
   Model,
   Collection,
   EventEmitter,
+  EventConfig,
+  TypedEventCallback,
   KeyCreators,
   connect,
-  serialize,
-  attribute,
-  output
+  attribute
 }

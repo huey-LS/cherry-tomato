@@ -1,21 +1,18 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2015",
     "module": "CommonJS",
     "strict": true,
     "declaration": true,
     "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "lib": [
       "ESNext",
       "DOM"
     ],
-    "outDir": "lib"
   }
 }

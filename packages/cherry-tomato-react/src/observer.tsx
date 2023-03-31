@@ -35,8 +35,14 @@ export default function observer (options?: ObserveOptions) {
         )
       }
 
+      willNextUpdate = false;
+
       updateView = () => {
-        this.forceUpdate();
+        this.willNextUpdate = true;
+        setTimeout(() => {
+          this.forceUpdate();
+          this.willNextUpdate = false;
+        }, 0);
       }
 
       observe = (props: any) => {
