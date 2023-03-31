@@ -1,5 +1,16 @@
 # @cherry-tomato/react
 
+## 3.0.0-beta.0
+
+### Major Changes
+
+- 8c8db4a: 更新到 typescript5,使用最新的装饰器https://github.com/tc39/proposal-decorators
+
+### Patch Changes
+
+- Updated dependencies [8c8db4a]
+  - @cherry-tomato/core@3.0.0-beta.0
+
 ## 2.1.1
 
 ### Patch Changes
