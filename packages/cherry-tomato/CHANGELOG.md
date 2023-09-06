@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.0.0-beta.3
+
+### Patch Changes
+
+- b496bbf: 修复 babel 编译后，field 的装饰器没有 addInitializer 的问题
+
 ## 3.0.0-beta.2
 
 ### Patch Changes
