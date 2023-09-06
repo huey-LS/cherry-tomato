@@ -8,14 +8,23 @@ import autoObserve, { ObserveOptions } from './auto-observe';
 export default function observe (
   options?: ObserveOptions
 ) {
-  return function (): (this: React.Component, newValue: Model) => Model {
-    return function (newValue) {
-      createObserveForComponent(
-        Model,
-        this,
-        options
-      )
-      return newValue;
+  return function<This, Value> (
+    value: undefined,
+    context: ClassFieldDecoratorContext<This, Value>
+  ) {
+    let removeListener: ReturnType<typeof createObserveForComponent>;
+    if (context.kind === 'field') {
+      return function (this: This, initialValue: Value) {
+        if (removeListener) {
+          removeListener();
+        }
+        removeListener = createObserveForComponent(
+          initialValue,
+          this,
+          options
+        )
+        return initialValue;
+      }
     }
   }
 }
@@ -38,4 +47,5 @@ function createObserveForComponent (
       oldComponentWillUnmount.call(this, ...args);
     }
   }
+  return removeListener;
 }
