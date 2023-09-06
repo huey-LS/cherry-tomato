@@ -6,30 +6,30 @@ import {
   DID_DESTROY
 } from '../constants/life-cycle';
 
-export class Event {
-  data: any;
-  target: any;
-  type: string;
-  origin?: Event;
+export class Event<D = any, TA = any, T = string> {
+  data: D;
+  target: TA;
+  type: T;
 
   constructor (
     options: {
-      data: any,
-      target: any,
-      type: string
+      data: D,
+      target: TA,
+      type: T
     }
   ) {
     const { data, target, type } = options;
     this.data = data;
     this.target = target;
     this.type = type;
-
-    return this;
   }
 }
 
-export interface TypedEventCallback<TypedEvent extends Event = Event> {
-  (event: TypedEvent): void;
+export interface TypedEventCallback<
+D = void,
+TA = any,
+> {
+  (this:TA, event: Event<D, TA>): void;
 }
 
 
@@ -38,23 +38,28 @@ export type EventConfig<Events extends string> = {
 }
 
 
-export interface CommonEventConfig extends EventConfig<
-typeof WILL_DESTROY | typeof DID_DESTROY
->{
-  [WILL_DESTROY]: TypedEventCallback,
-  [DID_DESTROY]: TypedEventCallback
+export type CommonEventConfig = {
+  [WILL_DESTROY]: TypedEventCallback<void>,
+  [DID_DESTROY]: TypedEventCallback<void>
 }
-
-// export interface EventConfig {
-//   [type: string]: TypedEventCallback,
-// }
 
 interface EventCallbacksByType {
   [type: string]: TypedEventCallback[];
 }
 
+
+type EventDataToEventCallback<T> = {
+  [K in keyof T]: TypedEventCallback<T[K]>;
+}
+
+type AccessCallbackEventData<C> = C extends TypedEventCallback<infer D> ? D : never;
+
+type AccessCallbackThis<C, TA> = C extends TypedEventCallback<infer D> ? TypedEventCallback<D, TA> : never;
+
+
 export default class EventEmitter<
-CE extends EventConfig<never> = {},
+ED = {},
+CE extends EventConfig<never> = EventDataToEventCallback<ED>,
 EventsConfig = CE & CommonEventConfig
 > {
   static isEvent = function (obj: any): obj is EventEmitter {
@@ -79,31 +84,24 @@ EventsConfig = CE & CommonEventConfig
     this._destroyed = false;
   }
 
-  emit (name: Event|keyof EventsConfig, data: any, originEvent?: Event) {
+  emit<K extends keyof EventsConfig> (name: K, data: AccessCallbackEventData<EventsConfig[K]>) {
     let event: Event;
-    if (EventEmitter.isEvent(name)) {
-      event = data;
-    } else {
-      event = new Event({
-        target: this,
-        data,
-        type: name as string
-      });
-    }
-    if (originEvent) {
-      event.origin = originEvent;
-    }
+    event = new Event({
+      target: this,
+      data,
+      type: name as string
+    });
 
     let type = event.type;
     let events = this._events[type];
     if (events) {
       events.forEach((callback) => {
-        callback(event);
+        callback.call(this, event);
       })
     }
 
     this._all_events.forEach((callback) => {
-      callback(event);
+      callback.call(this, event);
     })
   }
 
@@ -126,7 +124,7 @@ EventsConfig = CE & CommonEventConfig
     return callback;
   }
 
-  addListener<K extends keyof EventsConfig>(name: K, callback: EventsConfig[K]) {
+  addListener<K extends keyof EventsConfig, TA extends this>(name: K, callback: AccessCallbackThis<EventsConfig[K], TA>) {
     let removeListener = () => {};
     if (this._destroyed) return removeListener;
     if (callback) {

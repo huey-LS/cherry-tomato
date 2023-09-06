@@ -1,4 +1,5 @@
 import {
+  Attributes,
   Model
 } from '../../src/index';
 
@@ -79,7 +80,7 @@ describe('Model', function () {
         count: 1
       })
 
-      modelWillUpdate (prevAttribute: any, nextAttribute: any) {
+      modelWillUpdate ([prevAttribute, nextAttribute]: Attributes[]) {
         try {
           expect(prevAttribute).toBe(this._attributes);
           expect(prevAttribute.get('count')).toBe(1);
@@ -89,7 +90,7 @@ describe('Model', function () {
         }
       }
 
-      modelDidUpdate (prevAttribute: any, nextAttribute: any) {
+      modelDidUpdate ([prevAttribute, nextAttribute]: Attributes[]) {
         try {
           expect(nextAttribute).toBe(this._attributes);
           expect(prevAttribute.get('count')).toBe(1);
@@ -111,6 +112,7 @@ describe('Model', function () {
       try {
         const [ prevAttribute, nextAttribute ] = event.data;
         expect(event.type).toBe('modelWillUpdate');
+        expect(event.target).toBe(testModel);
         expect(testModel).toBe(event.target);
         expect(prevAttribute).toBe(testModel._attributes);
         expect(prevAttribute.get('count')).toBe(1);

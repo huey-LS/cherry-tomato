@@ -9,20 +9,23 @@ import {
 
 import autoObserve, { ObserveOptions } from './auto-observe';
 
-export default function useCherryTomato (model: Model, options: UseCherryTomatoOptions = {}) {
+export default function useCherryTomato (model: Model | null, options: UseCherryTomatoOptions = {}) {
   const [, updateState] = useState<any>();
 
   useLayoutEffect(() => {
     let isSubscribed = true;
-    let removeListener = autoObserve(
-      model,
-      () => {
-        if (isSubscribed) {
-          updateState({});
-        }
-      },
-      options
-    );
+    let removeListener = () => {};
+    if (model) {
+      removeListener = autoObserve(
+        model,
+        () => {
+          if (isSubscribed) {
+            updateState({});
+          }
+        },
+        options
+      );
+    }
 
     return () => {
       isSubscribed = false;

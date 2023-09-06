@@ -36,6 +36,58 @@ describe('Collection', function () {
     expect(testCollection.length).toBe(0);
   })
 
+  test('should clone success', () => {
+    let testCollection1 = new TestCollection();
+    testCollection1.set('text', 1);
+    testCollection1.addChild({ text: 'abc1' });
+    let testCollection2 = testCollection1.clone();
+    expect(testCollection1.get('text')).toBe(1);
+    expect(testCollection1.length).toBe(1);
+    expect(testCollection1.children[0].get('text')).toBe('abc1');
+    expect(testCollection2.get('text')).toBe(1);
+    expect(testCollection2.length).toBe(1);
+    expect(testCollection2.children[0].get('text')).toBe('abc1');
+    expect(testCollection2.children[0]).toBe(testCollection1.children[0]);
+    testCollection1.set('text', 2);
+    testCollection1.addChild({ text: 'abc2' });
+    expect(testCollection1.get('text')).toBe(2);
+    expect(testCollection1.length).toBe(2);
+    expect(testCollection1.children[1].get('text')).toBe('abc2');
+    expect(testCollection2.get('text')).toBe(1);
+    expect(testCollection2.length).toBe(1);
+    expect(testCollection2.children[0]).toBe(testCollection1.children[0]);
+  })
+
+  test('should slice success', () => {
+    let testCollection1 = new TestCollection();
+    testCollection1.addChild({ text: 'abc1' });
+    testCollection1.addChild({ text: 'abc2' });
+    let testCollection2 = testCollection1.slice(0, 1);
+    let testCollection3 = testCollection1.slice(1, 2);
+    expect(testCollection1.length).toBe(2);
+    expect(testCollection2.length).toBe(1);
+    expect(testCollection3.length).toBe(1);
+    expect(testCollection1.children[0].get('text')).toBe('abc1');
+    expect(testCollection2.children[0].get('text')).toBe('abc1');
+    expect(testCollection3.children[0].get('text')).toBe('abc2');
+    expect(testCollection2.children[0]).toBe(testCollection1.children[0]);
+    expect(testCollection3.children[0]).toBe(testCollection1.children[1]);
+  })
+
+  test('should filter success', () => {
+    let testCollection1 = new TestCollection();
+    testCollection1.addChild({ text: 'abc1' });
+    testCollection1.addChild({ text: 'abc2' });
+    let testCollection2 = testCollection1.filter((model) => {
+      return model.get('text') === 'abc1';
+    });
+    expect(testCollection1.length).toBe(2);
+    expect(testCollection2.length).toBe(1);
+    expect(testCollection1.children[0].get('text')).toBe('abc1');
+    expect(testCollection2.children[0].get('text')).toBe('abc1');
+    expect(testCollection2.children[0]).toBe(testCollection1.children[0]);
+  })
+
   test('should merge success', () => {
     let testCollection1 = new TestCollection();
     let testCollection2 = new TestCollection();
@@ -72,10 +124,10 @@ describe('Collection', function () {
   })
 
   test('should life-cycle collectionWillUpdateChildren call success', (done) => {
-    class WillUpdateChildrenTestCollection extends Collection {
+    class WillUpdateChildrenTestCollection extends Collection<InitialAttributesModel> {
       static Model = InitialAttributesModel;
 
-      collectionWillUpdateChildren (prevChildren: any[], nextChildren: any[]) {
+      collectionWillUpdateChildren ([prevChildren, nextChildren]: InitialAttributesModel[][]) {
         try {
           expect(prevChildren.length).toBe(0);
           expect(nextChildren.length).toBe(1);
@@ -92,10 +144,10 @@ describe('Collection', function () {
     willUpdateChildrenTestCollection.addChild({ text: 'abc' });
   })
   test('should life-cycle collectionDidUpdateChildren call success', (done) => {
-    class DidUpdateChildrenTestCollection extends Collection {
+    class DidUpdateChildrenTestCollection extends Collection<InitialAttributesModel> {
       static Model = InitialAttributesModel;
 
-      collectionDidUpdateChildren (prevChildren: any[], nextChildren: any[]) {
+      collectionDidUpdateChildren ([prevChildren, nextChildren]: InitialAttributesModel[][]) {
         try {
           expect(prevChildren.length).toBe(0);
           expect(nextChildren.length).toBe(1);
@@ -112,17 +164,14 @@ describe('Collection', function () {
     didUpdateChildrenTestCollection.addChild({ text: 'abc' });
   })
   test('should life-cycle collectionChildDidUpdate call success', (done) => {
-    class ChildDidUpdateTestCollection extends Collection {
+    class ChildDidUpdateTestCollection extends Collection<InitialAttributesModel> {
       static Model = InitialAttributesModel;
 
-      collectionChildDidUpdate (event: any) {
-        const { type, data, target } = event;
+      collectionChildDidUpdate (data: { child: InitialAttributesModel }) {
         try {
-          expect(type).toBe('modelDidUpdate');
-          expect(data.length).toBe(2);
-          expect(data[0].get('text')).toBe('abc');
-          expect(data[1].get('text')).toBe('def');
-          expect(target.get('text')).toBe('def');
+          const childModel = data.child;
+          expect(childModel).toBeInstanceOf(InitialAttributesModel);
+          expect(childModel.get('text')).toBe('def');
           done();
         } catch (e) {
           done(e);

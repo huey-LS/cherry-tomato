@@ -18,27 +18,26 @@ import { respond } from '../shared/spread';
 
 type prevChildren<ModelClass> = ModelClass[];
 type nextChildren<ModelClass> = ModelClass[];
-interface CollectionUpdateChildrenEvent<ModelClass> extends Event {
-  data: [
-    prevChildren<ModelClass>,
-    nextChildren<ModelClass>
-  ]
+type CollectionUpdateChildrenEventData<ModelClass> = [
+  prevChildren<ModelClass>,
+  nextChildren<ModelClass>
+]
+
+export interface CommonCollectionEventConfig<ModelClass> {
+  [COLLECTION_WILL_UPDATE_CHILDREN]: CollectionUpdateChildrenEventData<ModelClass>;
+  [COLLECTION_DID_UPDATE_CHILDREN]: CollectionUpdateChildrenEventData<ModelClass>;
 }
 
-export interface CommonCollectionEventConfig<ModelClass> extends CommonModelEventConfig {
-  [COLLECTION_WILL_UPDATE_CHILDREN]: TypedEventCallback<CollectionUpdateChildrenEvent<ModelClass>>,
-  [COLLECTION_DID_UPDATE_CHILDREN]: TypedEventCallback<CollectionUpdateChildrenEvent<ModelClass>>
-}
-
-// @mixinFunctionFromArray(
-//   transformFromArrayMap,
-//   (target: any) => target._children
-// )
 class Collection<
 CM extends Model = Model,
-CCE extends EventConfig<never> = {},
-CollectionEvents extends EventConfig<never> = CCE & CommonCollectionEventConfig<CM>
-> extends Model<CollectionEvents> {
+ED = {},
+> extends Model<
+ED & CommonCollectionEventConfig<CM> & {
+  [COLLECTION_CHILD_DID_UPDATE]: {
+    child: CM
+  }
+}
+> {
   static isCollection = function (obj: any): obj is Collection {
     return obj &&
         (
@@ -78,7 +77,7 @@ CollectionEvents extends EventConfig<never> = CCE & CommonCollectionEventConfig<
       respond(
         COLLECTION_CHILD_DID_UPDATE,
         this,
-        [event]
+        { child: event.target }
       );
     }
   }
@@ -172,12 +171,16 @@ CollectionEvents extends EventConfig<never> = CCE & CommonCollectionEventConfig<
     return newCollection;
   }
 
+  abc? (a: string): void;
+
   // before children change
-  [COLLECTION_WILL_UPDATE_CHILDREN] (prevChildren: CM[], nextChildren: CM[]) {}
+  protected [COLLECTION_WILL_UPDATE_CHILDREN]? (data: CollectionUpdateChildrenEventData<CM>): void;
   // after children change
-  [COLLECTION_DID_UPDATE_CHILDREN] (prevChildren: CM[], nextChildren: CM[]) {}
+  [COLLECTION_DID_UPDATE_CHILDREN]? (data: CollectionUpdateChildrenEventData<CM>): void;
   // after one child change
-  [COLLECTION_CHILD_DID_UPDATE] (model: CM, prevAttributes: Attributes) {}
+  [COLLECTION_CHILD_DID_UPDATE]? (data: {
+    child: CM
+  }): void;
 
   clone () {
     const newThis = super.clone.call(this);

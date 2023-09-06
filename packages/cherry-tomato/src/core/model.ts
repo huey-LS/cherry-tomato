@@ -19,22 +19,17 @@ const defaultKeyCreator = incrementCreator();
 
 type prevAttributes = Attributes;
 type nextAttributes = Attributes;
-interface ModelUpdateEvent extends Event {
-  data: [prevAttributes, nextAttributes]
-}
 
-export interface CommonModelEventConfig extends EventConfig<
-  typeof MODEL_WILL_UPDATE | typeof MODEL_DID_UPDATE
-> {
-  [MODEL_WILL_UPDATE]: TypedEventCallback<ModelUpdateEvent>;
-  [MODEL_DID_UPDATE]: TypedEventCallback<ModelUpdateEvent>;
+export type CommonModelEventConfig = {
+  [MODEL_WILL_UPDATE]: [prevAttributes, nextAttributes];
+  [MODEL_DID_UPDATE]: [prevAttributes, nextAttributes];
 }
-
 
 export default class Model<
-CME extends EventConfig<never> = {},
-ModelEvents extends EventConfig<never> = CME & CommonModelEventConfig
-> extends EventEmitter<ModelEvents> {
+ED = {}
+> extends EventEmitter<
+ED & CommonModelEventConfig
+> {
   static isModel = function (obj: any): obj is Model {
     return obj &&
       (
@@ -90,11 +85,11 @@ ModelEvents extends EventConfig<never> = CME & CommonModelEventConfig
     }
   }
 
-  [MODEL_WILL_UPDATE]? (prevAttributes: Attributes, nextAttributes: Attributes): void;
-  [MODEL_DID_UPDATE]? (prevAttributes: Attributes, nextAttributes: Attributes): void;
+  [MODEL_WILL_UPDATE]? (data: [prevAttributes, nextAttributes]): void;
+  [MODEL_DID_UPDATE]? (data: [prevAttributes, nextAttributes]): void;
 
   set (
-    key: string|any,
+    key: string | any,
     newValue?: any
   ) {
     let prevAttributes = this._attributes;
