@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.0.0-beta.2
+
+### Patch Changes
+
+- 05c2e3e: collection 的 filter、slice 提供更准确的 ts 声明；removeChild 和 resetChildren 支持 model 对象
+
 ## 3.0.0-beta.1
 
 ### Patch Changes

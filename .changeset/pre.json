@@ -6,6 +6,7 @@
     "@cherry-tomato/react": "2.1.1"
   },
   "changesets": [
+    "eighty-islands-rescue",
     "late-nails-reply",
     "two-moles-repeat"
   ]
