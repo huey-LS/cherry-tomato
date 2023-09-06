@@ -1,5 +1,11 @@
 # @cherry-tomato/react
 
+## 3.0.0-beta.2
+
+### Patch Changes
+
+- 40c0bf1: @cherry-tomato/react 的 jsx 编译结果为 react
+
 ## 3.0.0-beta.1
 
 ### Patch Changes
