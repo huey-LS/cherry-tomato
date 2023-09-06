@@ -124,7 +124,7 @@ ED & CommonCollectionEventConfig<CM> & {
   filter (...args: Parameters<Array<CM>["filter"]>) {
     const newChildren = this.callFromArray('filter', ...args);
     const constructor = this.constructor as typeof Collection;
-    let newCollection = new constructor();
+    let newCollection = new constructor() as this;
     newCollection.resetChildren(
       newChildren
     );
@@ -134,7 +134,7 @@ ED & CommonCollectionEventConfig<CM> & {
   slice (...args: Parameters<Array<CM>["slice"]>) {
     const newChildren = this.callFromArray('slice', ...args);
     const constructor = this.constructor as typeof Collection;
-    let newCollection = new constructor();
+    let newCollection = new constructor() as this;
     newCollection.resetChildren(
       newChildren
     );
@@ -164,7 +164,7 @@ ED & CommonCollectionEventConfig<CM> & {
     ) {
       throw new Error('collection.concat must be the same collection');
     }
-    let newCollection = new constructor();
+    let newCollection = new constructor() as this;
     newCollection.resetChildren(
       this.children.concat(...args.map(({ children })=> children))
     );
@@ -222,14 +222,17 @@ ED & CommonCollectionEventConfig<CM> & {
     return this;
   }
 
-  removeChild (itemKey: any) {
+  removeChild (itemKey: any | Model) {
+    if (Model.isModel(itemKey)) {
+      itemKey = itemKey.key;
+    }
     itemKey && this._removeChildByKey(
       itemKey
     );
     return this;
   }
 
-  resetChildren (items:  (CM|any)[]) {
+  resetChildren (items:  (CM|any)[] | Collection) {
     this._resetChild(
       items.map((item) => (
         this._createModal(item)
