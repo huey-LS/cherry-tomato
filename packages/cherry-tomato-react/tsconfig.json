@@ -5,7 +5,7 @@
     "strict": true,
     "declaration": true,
     "moduleResolution": "node",
-    "jsx": "preserve",
+    "jsx": "react",
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
