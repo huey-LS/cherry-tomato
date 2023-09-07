@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.0.0-beta.4
+
+### Patch Changes
+
+- 0f803a1: 修复 clone 后 attribute 装饰器错误
+
 ## 3.0.0-beta.3
 
 ### Patch Changes
