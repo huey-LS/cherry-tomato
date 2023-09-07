@@ -12,6 +12,9 @@ class InitialAttributesModel extends Model {
 
 class TestCollection extends Collection<InitialAttributesModel> {
   static Model = InitialAttributesModel;
+
+  @attribute()
+  count = 1;
 }
 
 describe('Collection', function () {
@@ -42,18 +45,23 @@ describe('Collection', function () {
     testCollection1.addChild({ text: 'abc1' });
     let testCollection2 = testCollection1.clone();
     expect(testCollection1.get('text')).toBe(1);
+    expect(testCollection1.count).toBe(1);
     expect(testCollection1.length).toBe(1);
     expect(testCollection1.children[0].get('text')).toBe('abc1');
     expect(testCollection2.get('text')).toBe(1);
     expect(testCollection2.length).toBe(1);
+    expect(testCollection2.count).toBe(1);
     expect(testCollection2.children[0].get('text')).toBe('abc1');
     expect(testCollection2.children[0]).toBe(testCollection1.children[0]);
     testCollection1.set('text', 2);
+    testCollection1.count = 2;
     testCollection1.addChild({ text: 'abc2' });
     expect(testCollection1.get('text')).toBe(2);
+    expect(testCollection1.count).toBe(2);
     expect(testCollection1.length).toBe(2);
     expect(testCollection1.children[1].get('text')).toBe('abc2');
     expect(testCollection2.get('text')).toBe(1);
+    expect(testCollection2.count).toBe(1);
     expect(testCollection2.length).toBe(1);
     expect(testCollection2.children[0]).toBe(testCollection1.children[0]);
   })

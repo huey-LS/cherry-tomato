@@ -92,42 +92,35 @@ export function attribute (
     }
 
     if (context.kind === 'field') {
-      let defined = false;
+      let propertyDescriptor: PropertyDescriptor = {
+        get (this: This) {
+          return this.get(name);
+        },
+        set (this: This, newValue) {
+          if (newValue !== SHOULD_NOT_SET) {
+            this.set(name, newValue);
+          }
+        }
+      };
       context.addInitializer && context.addInitializer(function () {
-        if (!defined) {
-          defined = true;
+        if (
+          Object.getOwnPropertyDescriptor(this, context.name) !== propertyDescriptor
+        ) {
           Object.defineProperty(
             this,
             context.name,
-            {
-              get () {
-                return this.get(name);
-              },
-              set (newValue) {
-                if (newValue !== SHOULD_NOT_SET) {
-                  this.set(name, newValue);
-                }
-              }
-            }
+            propertyDescriptor
           )
         }
       });
       return function (this: This, initialValue: Value) {
-        if (!defined) {
-          defined = true;
+        if (
+          Object.getOwnPropertyDescriptor(this, context.name) !== propertyDescriptor
+        ) {
           Object.defineProperty(
             this,
             context.name,
-            {
-              get () {
-                return this.get(name);
-              },
-              set (newValue) {
-                if (newValue !== SHOULD_NOT_SET) {
-                  this.set(name, newValue);
-                }
-              }
-            }
+            propertyDescriptor
           )
         }
         if (typeof this.get(name) !== 'undefined') {
