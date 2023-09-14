@@ -88,6 +88,11 @@ ED & CommonModelEventConfig
   [MODEL_WILL_UPDATE]? (data: [prevAttributes, nextAttributes]): void;
   [MODEL_DID_UPDATE]? (data: [prevAttributes, nextAttributes]): void;
 
+  reset (newValue: any) {
+    const newAttributes = new Attributes({ ...newValue });
+    this.updateNewAttributes(newAttributes);
+  }
+
   set (
     key: string | any,
     newValue?: any
@@ -99,7 +104,7 @@ ED & CommonModelEventConfig
     } else {
       nextAttributes = prevAttributes.merge(key);
     }
-    this.reset(nextAttributes)
+    this.updateNewAttributes(nextAttributes)
     return this;
   }
 
@@ -109,11 +114,11 @@ ED & CommonModelEventConfig
 
   remove (attributeName: string) {
     let nextAttributes = this._attributes.remove(attributeName);
-    this.reset(nextAttributes)
+    this.updateNewAttributes(nextAttributes)
     return this;
   }
 
-  reset (nextAttributes: Attributes) {
+  updateNewAttributes (nextAttributes: Attributes) {
     let prevAttributes = this._attributes;
     respond(MODEL_WILL_UPDATE, this, [prevAttributes, nextAttributes])
     this._attributes = nextAttributes;

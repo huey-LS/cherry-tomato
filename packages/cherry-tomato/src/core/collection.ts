@@ -171,8 +171,6 @@ ED & CommonCollectionEventConfig<CM> & {
     return newCollection;
   }
 
-  abc? (a: string): void;
-
   // before children change
   protected [COLLECTION_WILL_UPDATE_CHILDREN]? (data: CollectionUpdateChildrenEventData<CM>): void;
   // after children change

@@ -11,7 +11,7 @@ class InitialAttributesModel extends Model {
   text: string = 'a';
 
   @attribute()
-  accessor text2: string = '';
+  accessor text2: string = 'a';
 
   @attribute()
   get differentKey () { return 0; };
@@ -19,7 +19,7 @@ class InitialAttributesModel extends Model {
 
 describe('attribute', function () {
   var model = new InitialAttributesModel();
-  var model2 = new InitialAttributesModel({ count: 20, text: 'ba' });
+  var model2 = new InitialAttributesModel({ count: 20, text: 'b', text2: 'b' });
 
   test('should get default attribute success', () => {
     expect(model.count).toBe(1);
@@ -27,7 +27,7 @@ describe('attribute', function () {
     expect(model.differentKey).toBe(0);
 
     expect(model2.count).toBe(20);
-    expect(model2.text).toBe('ba');
+    expect(model2.text).toBe('b');
   })
 
 

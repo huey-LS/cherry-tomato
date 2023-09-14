@@ -1,4 +1,4 @@
-# cherry-tomato
+.# cherry-tomato
 [![npm version](https://img.shields.io/npm/v/@cherry-tomato/core.svg?maxAge=3600)](https://www.npmjs.org/package/@cherry-tomato/core)
 
 # 介绍
@@ -28,61 +28,71 @@ npm install --save @cherry-tomato/core
 - [Usage with react](https://github.com/huey-LS/cherry-tomato/tree/master/packages/cherry-tomato-react)
 
 ## API 介绍
+
+### 最常用的个API
+1. Model
+2. Collection
+3. attribute 装饰器
+
 ### Model 模型
-基础模型类， 都继承于这个开发
+基础模型类。最基础也是重要的，一般需要配合 attribute 装饰器使用
 
 #### Usage 用法
-```js
-import { Model } from '@cherry-tomato/core';
+```ts
+import {
+  Model,
+  attribute
+} from '@cherry-tomato/core';
 
 class CustomModel extends Model {
-  static key; // key生成函数 默认使用 key-creators.incrementCreator
-  static initialAttributes = () => ({ test: 1 }); // 每次实例初始化的属性
-
-  // attributes set 前的 hook
-  modelWillUpdate () {}
-
-  // attributes set 后的 hook
-  modelDidUpdate () {}
+  @attribute()
+  accessor text = 'a'; // 设置默认值为a
 }
+
+const custom = new CustomModel();
+custom.text === 'a';
 ```
-
-##### Static Attributes 静态函数
-- [initialAttributes] {Function} - 建议`Function`
-  设置为`Function`时，将会把返回值作为初始化的属性
-- key - key生成函数 默认使用
-
-#### Hooks 生命周期
-- modelWillUpdate {Function(prevAttributes, nextAttributes)} - 调用了`set`, 但还没有执行`set` 操作时，此时 `this.get(attributeName) === prevAttributes.get(attributeName)`
-- modelDidUpdate {Function(prevAttributes, nextAttributes)} - 调用了`set`, `set`执行成功, 此时 `this.get(attributeName) === nextAttributes.get(attributeName)`
 
 ##### Arguments 实例化时的可选参数
-- `[attributes]` 初始化属性 会和 `static initialAttributes`合并
-
-##### Method 内置函数（同时包含 EventEmitter 的内容）
-- `get`
-- `set`
-- `EventEmitter` 所有函数
-
-实例化后可以通过 `get`,`set`对属性进行读写
-```js
-var m = new CustomModel();
-m.get('test') // 1
-m.set({ test: 2 })
-m.get('test') // 2
-
-var m = new CustomModel({ test: 3 });
-m.get('test') // 3
+- `[attributes]` 初始化属性
+```ts
+const custom = new CustomModel({ text: 'b' });
+custom.text === 'b';
 ```
 
+
+##### Method 内置函数（同时包含 EventEmitter 的内容）
+- `get(key)` 获取属性，设置过的属性可以被通过**attribute**装饰过的属性直接获取
+- `set(key, value)` 设置属性
+- `reset(value)` 重设所有属性
+- `remove(key)` 删除对应属性
+
+使用例子如下
+```ts
+custom.set('text', 'c');
+custom.text === 'c';
+custom.get('text') === 'c';
+```
+
+
+##### Static Attributes 静态函数
+- [initialAttributes] {Function} - 将会把返回值作为初始化的属性。现在更推荐使用`class fields`的方式设置默认值
+- key - key生成函数，默认无需设置，会自动生成
+
+#### Hooks 生命周期
+model设置了2个生命周期，同时会抛出同名的Event
+1. modelWillUpdate {Function([prevAttribute, nextAttribute])} - 调用了`set`, 但还没有执行`set` 操作时，此时 `this.get(attributeName) === prevAttributes.get(attributeName)`
+2. modelDidUpdate {Function([prevAttribute, nextAttribute])} - 调用了`set`, `set`执行成功, 此时 `this.get(attributeName) === nextAttributes.get(attributeName)`
+
+
 ### Collection 集合
-对`Model`集合的一层包装
-```js
-import { Collection } from '@cherry-tomato/core';
-class CustomCollection extends Collection {
+继承自Model, 扩充对数组类型的支持。会更具`static Model`的静态属性自动转换children对对应的对象实例
+```ts
+import {
+  Collection
+  } from '@cherry-tomato/core';
+class CustomCollection extends Collection<CustomModel> {
   static Model = CustomModel;
-  static key;
-  static initialAttributes = { test: 1 };
 
   // hook: before update children (includes remove, add)
   collectionWillUpdateChildren () {}
@@ -90,95 +100,97 @@ class CustomCollection extends Collection {
   collectionDidUpdateChildren () {}
 }
 
-// new CustomCollection([initialAttributes], [initialAttributes[]]);
-var collection = new CustomCollection(
-  { attr2: 2 }
-)
-```
-##### Static Attributes 静态函数
-- [Model] - 用于自动生成子元素的构造函数
-- `Model` 所有函数
+const customCollection = new CustomCollection();
+customCollection.resetChildren(
+  [
+    {
+      text: 'a'
+    },
+    {
+      text: 'b'
+    }
+  ]
+);
 
-#### Hooks 生命周期
-- `Model`的所有hooks
-- collectionWillUpdateChildren {Function(prevChildren: Array<Model>, nextChildren: Array<Model>)} - 添加/删除子元素之前后触发
-- collectionDidUpdateChildren {Function(prevChildren: Array<Model>, nextChildren: Array<Model>)} - 添加/删除子元素后触发
-- collectionChildDidUpdate - 任一子模型 进行 `modelDidUpdate`, `collectionDidUpdateChildren`, `collectionDidUpdateChildren` 后被唤起
+customCollection.children[0] instanceof CustomModel;
+customCollection.children[0].text === 'a';
+customCollection.children[1].text === 'b';
+```
 
 ##### Arguments 实例化时的可选参数
 - `[initialAttributes]` 同`Model`的`initialAttributes`
 
+##### Static Attributes 静态函数
+- `Model` - 用于自动生成子元素的构造函数
+- 其他继承于 Model
+
 ##### Method 内置函数（同时包含 Model 的内容）
-- `EventEmitter` 所有函数
 - `Model` 所有函数
 - 可以使用`Array`的各种方法 已支持`forEach`, `map`, `reduce`, `reduceRight`, `slice`, `filter`, `find`, `findIndex`, `some`, `every`, `includes`, `indexOf`
-  ```
-    collection.forEach((item) => {
-      console.log(item.get('attr3'))
+  ```ts
+    customCollection.forEach((custom) => {
+      console.log(custom.text)
     })
-    // 3
-    // 3
+    // 'a'
+    // 'b'
   ```
+  特别注意：filter、slice、concat 返回的是一个collection实力
 - `addChild` - 添加一个子元素到最后，并添加监听，会自动使用设置的 `Static Model` 去创建
   - @params item {Object} - 子元素属性内容
 - `removeChild` - 移除一个子元素，并取消监听，会自动使用设置的 `Static Model` 去创建
   - @params item {Model} - 子元素实例
 - `resetChildren` - 重设所有子元素，并添加监听，会自动使用设置的 `Static Model` 去创建
   - @params items {Array} - 子元素数据数组
-- `merge` & `concat` - 合并2个或者多个`collection`，
-  - `merge` 会合并到原始的
-  - `concat`会返回一个新的`collection`
+- `merge` 效果同 concat 但是会修改自身
+
+#### Hooks 生命周期
+- `Model`的所有hooks
+- collectionWillUpdateChildren {Function([prevChildren: Array<Model>, nextChildren: Array<Model>])} - 添加/删除子元素之前后触发
+- collectionDidUpdateChildren {Function([prevChildren: Array<Model>, nextChildren: Array<Model>])} - 添加/删除子元素后触发
+- collectionChildDidUpdate - 任一子元素发生`modelDidUpdate`, `collectionDidUpdateChildren`, `collectionDidUpdateChildren`事件后触发
 
 
+
+## 其他额外辅助API
 ## EventEmitter 事件订阅基类
 待补充
 
 
-## serialize & output 自动序列化&反序列化输出
-```js
-class MyModel extends Model {
-  @serialize('xxxCount')
-  get count () { return 0; }
-  set count (arg) {}
-
-  @output()
-  getFormated () {
-    return [
-      'count'
-    ]
-  }
-}
-const myModel = new MyModel();
-myModel.count // 0, 自定义的getter将作为默认内容输出
-myModel.count = 1 //
-myModel.count // 1， 能通过 setter 更新
-myModel.getFormated() // { xxxCount: 1 } 还能导出原样格式的
-
-const myModel2 = new MyModel({ xxxCount: 3 });
-myModel2.count // 3, 可以初始化
-```
+## attribute 自动序列化&反序列化输出
+参考Model就可以了
 
 ## connect 模型关联方法
-`model`高级用法，关联2个不同的 `model`
+高级用法，关联不同的实例
 
 ### 使用方法
 ```js
-import { Model, connect } from '@cherry-tomato/core';
+import {
+  Model,
+  connect,
+  attribute
+} from '@cherry-tomato/core';
 
-import ModelA from './model-a';
+class ModelA extends Model {
+  @attribute()
+  accessor text = 'a';
+}
 
 class ModelB extends Model {
-  @connect({
-    modelDidUpdate: function (self, connectedModel) {
-      self.set('connectedCount', connectedModel.get('count'));
-    }
-  })
+  @connect()
   a = new ModelA();
 }
 
-let b = new ModelB();
+const b = new ModelB({
+  a: {
+    text: 'aa'
+  }
+});
+
+b.a instanceof ModelA;
+b.a.text === 'aa';
 ```
-这样`a`被修改的时候，会关联触发`connect`中的`modelDidUpdate`，已同步更闹心
+
+
 
 ## 其他可用的功能
 ### KeyCreators 内置的key自动生成工具
