@@ -1,5 +1,24 @@
 # @cherry-tomato/react
 
+## 3.0.0
+
+### Major Changes
+
+- 8c8db4a: 更新到 typescript5,使用最新的装饰器https://github.com/tc39/proposal-decorators
+
+### Patch Changes
+
+- 020c7a1: 简化事件范型写法；use-cherry-tomato 第一个参数支持 null，不必创建空的 model；model 上自动响应的生命周期函数，参数和 event 保持一致；补充一些测试用例
+- 40c0bf1: @cherry-tomato/react 的 jsx 编译结果为 react
+- b496bbf: 修复 babel 编译后，field 的装饰器没有 addInitializer 的问题
+- Updated dependencies [05c2e3e]
+- Updated dependencies [020c7a1]
+- Updated dependencies [979e54f]
+- Updated dependencies [0f803a1]
+- Updated dependencies [b496bbf]
+- Updated dependencies [8c8db4a]
+  - @cherry-tomato/core@3.0.0
+
 ## 3.0.0-beta.3
 
 ### Patch Changes

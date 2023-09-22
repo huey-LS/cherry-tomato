@@ -1,5 +1,19 @@
 # @cherry-tomato/core
 
+## 3.0.0
+
+### Major Changes
+
+- 8c8db4a: 更新到 typescript5,使用最新的装饰器https://github.com/tc39/proposal-decorators
+
+### Patch Changes
+
+- 05c2e3e: collection 的 filter、slice 提供更准确的 ts 声明；removeChild 和 resetChildren 支持 model 对象
+- 020c7a1: 简化事件范型写法；use-cherry-tomato 第一个参数支持 null，不必创建空的 model；model 上自动响应的生命周期函数，参数和 event 保持一致；补充一些测试用例
+- 979e54f: 修复 connect 装饰器初始化数据错误及增加 model.reset
+- 0f803a1: 修复 clone 后 attribute 装饰器错误
+- b496bbf: 修复 babel 编译后，field 的装饰器没有 addInitializer 的问题
+
 ## 3.0.0-beta.5
 
 ### Patch Changes
