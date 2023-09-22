@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.0.0-beta.5
+
+### Patch Changes
+
+- 979e54f: 修复 connect 装饰器初始化数据错误及增加 model.reset
+
 ## 3.0.0-beta.4
 
 ### Patch Changes
