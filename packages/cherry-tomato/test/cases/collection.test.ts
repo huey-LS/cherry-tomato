@@ -8,6 +8,9 @@ import {
 class InitialAttributesModel extends Model {
   @attribute()
   count = 1;
+
+  @attribute()
+  text = '';
 }
 
 class TestCollection extends Collection<InitialAttributesModel> {
@@ -64,6 +67,32 @@ describe('Collection', function () {
     expect(testCollection2.count).toBe(1);
     expect(testCollection2.length).toBe(1);
     expect(testCollection2.children[0]).toBe(testCollection1.children[0]);
+  })
+
+  test('should map success', () => {
+    let testCollection1 = new TestCollection();
+    testCollection1.addChild({ text: 'abc1' });
+    testCollection1.addChild({ text: 'abc2' });
+    const textArray = testCollection1.map((model) => {
+      return model.text;
+    });
+    expect(textArray).toEqual(['abc1', 'abc2']);
+  })
+
+  test('should reduce success', () => {
+    let testCollection1 = new TestCollection();
+    testCollection1.addChild({ text: 'abc1' });
+    testCollection1.addChild({ text: 'abc2' });
+    expect(
+      testCollection1.reduce((str, model) => {
+        return str + model.text;
+      }, '')
+    ).toEqual('abc1abc2');
+    expect(
+      testCollection1.reduceRight((str, model) => {
+        return str + model.text;
+      }, '')
+    ).toEqual('abc2abc1');
   })
 
   test('should slice success', () => {

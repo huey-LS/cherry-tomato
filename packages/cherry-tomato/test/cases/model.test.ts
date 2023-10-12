@@ -75,7 +75,7 @@ describe('Model', function () {
 
 
   test('should life-cycle call success', (done) => {
-    class LifeCycleModel extends Model {
+    class LifeCycleModel extends Model<{}, { count: number }> {
       static initialAttributes = () => ({
         count: 1
       })

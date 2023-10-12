@@ -62,7 +62,6 @@ export function attribute (
         set (newValue) {
           if (newValue !== SHOULD_NOT_SET) {
             this.set(name, newValue);
-            (value as ClassAccessorDecoratorTarget<This, Value>).set.call(this, newValue);
           }
         },
         init (initialValue) {
@@ -87,7 +86,6 @@ export function attribute (
     if (context.kind === 'setter') {
       return function attributeSetter (this: This, newValue) {
         this.set(name, newValue);
-        (value as (v: Value) => Value).call(this, newValue);
       }
     }
 

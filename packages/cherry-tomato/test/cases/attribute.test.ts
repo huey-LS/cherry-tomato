@@ -3,7 +3,14 @@ import {
   attribute
 } from '../../src/index';
 
-class InitialAttributesModel extends Model {
+class InitialAttributesModel extends Model<
+{},
+{
+  count: number;
+  text: string;
+  text2: string;
+}
+> {
   @attribute()
   count = 1;
 

@@ -26,7 +26,9 @@ export type CommonModelEventConfig = {
 }
 
 export default class Model<
-ED = {}
+ED = {},
+Attrs = any,
+PAttrs = Partial<Attrs>
 > extends EventEmitter<
 ED & CommonModelEventConfig
 > {
@@ -60,7 +62,7 @@ ED & CommonModelEventConfig
 
   key!: string;
 
-  constructor (attributes = {}) {
+  constructor (attributes: PAttrs = {} as PAttrs) {
     super();
 
     const constructor = this.constructor as typeof Model;
@@ -93,9 +95,9 @@ ED & CommonModelEventConfig
     this.updateNewAttributes(newAttributes);
   }
 
-  set (
-    key: string | any,
-    newValue?: any
+  set<K extends keyof PAttrs> (
+    key: K | PAttrs,
+    newValue?: PAttrs[K]
   ) {
     let prevAttributes = this._attributes;
     let nextAttributes;

@@ -31,12 +31,14 @@ export interface CommonCollectionEventConfig<ModelClass> {
 class Collection<
 CM extends Model = Model,
 ED = {},
+Attrs = any,
 > extends Model<
 ED & CommonCollectionEventConfig<CM> & {
   [COLLECTION_CHILD_DID_UPDATE]: {
     child: CM
   }
-}
+},
+Attrs
 > {
   static isCollection = function (obj: any): obj is Collection {
     return obj &&
@@ -82,10 +84,12 @@ ED & CommonCollectionEventConfig<CM> & {
     }
   }
 
-  callFromArray<ArrayMethod extends keyof typeof Array.prototype> (
+  callFromArray<
+    ArrayMethod extends keyof typeof Array.prototype
+  > (
     method: ArrayMethod,
     ...args: Parameters<typeof Array.prototype[ArrayMethod]>
-  ) {
+  ): ReturnType<typeof Array.prototype[ArrayMethod]> {
     return Array.prototype[method].call(this.getChildren(), ...args);
   }
 
@@ -93,28 +97,50 @@ ED & CommonCollectionEventConfig<CM> & {
   forEach (...args: Parameters<Array<CM>["forEach"]>) {
     return this.callFromArray('forEach', ...args);
   }
-  map (...args: Parameters<Array<CM>["map"]>) {
-    return this.callFromArray('map', ...args);
+  // map: Array<CM>["map"] = (...args) => {
+  //   return this.callFromArray('map', ...args) as any;
+  // };
+  map<U> (
+    callback: (value: CM, index: number, array: CM[]) => U
+  ) {
+    return this.callFromArray('map', callback) as U[];
   }
-  reduce (...args: Parameters<Array<CM>["reduce"]>) {
-    return this.callFromArray('reduce', ...args);
+  reduce<U> (
+    callbackfn: (
+      previousValue: U,
+      currentValue: CM,
+      currentIndex: number,
+      array: CM[]
+    ) => U,
+    initialValue: U
+  ): U {
+    return this.callFromArray('reduce', callbackfn as any, initialValue) as U;
   }
-  reduceRight (...args: Parameters<Array<CM>["reduceRight"]>) {
-    return this.callFromArray('reduceRight', ...args);
+
+  reduceRight<U>(
+    callbackfn: (
+      previousValue: U,
+      currentValue: CM,
+      currentIndex: number,
+      array: CM[]
+    ) => U,
+    initialValue: U
+  ): U {
+    return this.callFromArray('reduceRight', callbackfn as any, initialValue) as U;
   }
-  find (...args: Parameters<Array<CM>["find"]>) {
+  find (...args: Parameters<Array<CM>["find"]>): ReturnType<Array<CM>["find"]> {
     return this.callFromArray('find', ...args);
   }
   findIndex (...args: Parameters<Array<CM>["findIndex"]>) {
     return this.callFromArray('findIndex', ...args);
   }
-  some (...args: Parameters<Array<CM>["some"]>) {
+  some (...args: Parameters<Array<CM>["some"]>): ReturnType<Array<CM>["some"]> {
     return this.callFromArray('some', ...args);
   }
-  every (...args: Parameters<Array<CM>["every"]>) {
+  every (...args: Parameters<Array<CM>["every"]>): ReturnType<Array<CM>["every"]> {
     return this.callFromArray('every', ...args);
   }
-  includes (...args: Parameters<Array<CM>["includes"]>) {
+  includes (...args: Parameters<Array<CM>["includes"]>): ReturnType<Array<CM>["includes"]> {
     return this.callFromArray('includes', ...args);
   }
   indexOf (...args: Parameters<Array<CM>["indexOf"]>) {
@@ -213,14 +239,14 @@ ED & CommonCollectionEventConfig<CM> & {
     return this._children.slice(0);
   }
 
-  addChild (item: CM|any) {
+  addChild (item: CM | any) {
     this._addChild(
       this._createModal(item)
     );
     return this;
   }
 
-  removeChild (itemKey: any | Model) {
+  removeChild (itemKey: string | CM) {
     if (Model.isModel(itemKey)) {
       itemKey = itemKey.key;
     }
@@ -230,7 +256,7 @@ ED & CommonCollectionEventConfig<CM> & {
     return this;
   }
 
-  resetChildren (items:  (CM|any)[] | Collection) {
+  resetChildren (items:  (CM|any)[] | this) {
     this._resetChild(
       items.map((item) => (
         this._createModal(item)
