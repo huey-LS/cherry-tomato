@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.0.1
+
+### Patch Changes
+
+- 0f27677: 更新 README 文档。完善 Collection 的 reduce 和 reduceRight 的 ts。attribute 装饰器 accessor 时不在调用老的 setter
+
 ## 3.0.0
 
 ### Major Changes
