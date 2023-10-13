@@ -256,9 +256,9 @@ Attrs
     return this;
   }
 
-  resetChildren (items:  (CM|any)[] | this) {
+  resetChildren (items?:  (CM|any)[] | this) {
     this._resetChild(
-      items.map((item) => (
+      (items || []).map((item) => (
         this._createModal(item)
       ))
     );

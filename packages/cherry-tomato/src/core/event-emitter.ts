@@ -166,12 +166,8 @@ EventsConfig = CE & CommonEventConfig
 
   clone () {
     const newThis = clone(this);
-    const events = this._events;
-    newThis._events = Object.keys(events).reduce((newEvents, key) => {
-      newEvents[key] = [ ...events[key] ];
-      return newEvents
-    }, {} as EventCallbacksByType);
-    newThis._all_events = this._all_events.slice(0);
+    newThis._events = {};
+    newThis._all_events = [];
     return newThis;
   }
 }
