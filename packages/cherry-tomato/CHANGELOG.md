@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.0.2
+
+### Patch Changes
+
+- 1b461c9: connect 装饰的属性将会自动 clone
+
 ## 3.0.1
 
 ### Patch Changes
