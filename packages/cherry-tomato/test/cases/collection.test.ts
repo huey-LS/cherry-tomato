@@ -1,6 +1,7 @@
 import {
   Model,
   Collection,
+  generateCollection,
   attribute
 } from '../../src/index';
 
@@ -11,6 +12,10 @@ class InitialAttributesModel extends Model {
 
   @attribute()
   text = '';
+
+  isZero () {
+    return this.count === 0;
+  }
 }
 
 class TestCollection extends Collection<InitialAttributesModel> {
@@ -219,5 +224,27 @@ describe('Collection', function () {
     const childDidUpdateTestCollection = new ChildDidUpdateTestCollection();
     childDidUpdateTestCollection.addChild({ text: 'abc' });
     childDidUpdateTestCollection.children[0].set({ text: 'def' });
+  })
+
+  test('should generateCollection success', () => {
+    const generatedCollection =  generateCollection(
+      InitialAttributesModel
+    )([
+      {
+        text: 'a'
+      },
+      {
+        count: 0,
+        text: 'b'
+      }
+    ]);
+
+    expect(generatedCollection.length).toBe(2);
+    expect(generatedCollection.children[0].text).toBe('a');
+    expect(generatedCollection.children[0].count).toBe(1);
+    expect(generatedCollection.children[0].isZero()).toBe(false);
+    expect(generatedCollection.children[1].text).toBe('b');
+    expect(generatedCollection.children[1].count).toBe(0);
+    expect(generatedCollection.children[1].isZero()).toBe(true);
   })
 })

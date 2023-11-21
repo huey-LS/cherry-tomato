@@ -28,7 +28,7 @@ export type CommonModelEventConfig = {
 export default class Model<
 ED = {},
 Attrs = any,
-PAttrs = Partial<Attrs>
+PAttrs extends Partial<Attrs> = Partial<Attrs>
 > extends EventEmitter<
 ED & CommonModelEventConfig
 > {

@@ -1,6 +1,8 @@
 import Attributes from './core/attributes';
 import Model from './core/model';
-import Collection from './core/collection';
+import Collection, {
+  generateCollection
+} from './core/collection';
 import EventEmitter, {
   EventConfig,
   TypedEventCallback
@@ -14,6 +16,7 @@ export {
   Attributes,
   Model,
   Collection,
+  generateCollection,
   EventEmitter,
   EventConfig,
   TypedEventCallback,

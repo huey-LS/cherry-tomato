@@ -43,7 +43,7 @@ export type CommonEventConfig = {
   [DID_DESTROY]: TypedEventCallback<void>
 }
 
-interface EventCallbacksByType {
+export interface EventCallbacksByType {
   [type: string]: TypedEventCallback[];
 }
 

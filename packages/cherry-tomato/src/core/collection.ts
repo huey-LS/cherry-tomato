@@ -1,11 +1,6 @@
-import Model, {
-  CommonModelEventConfig
-} from './model';
-import Attributes from './attributes';
+import Model from './model';
 import {
-  Event,
-  TypedEventCallback,
-  EventConfig
+  Event
 } from './event-emitter';
 import {
   MODEL_DID_UPDATE,
@@ -198,7 +193,7 @@ Attrs
   }
 
   // before children change
-  protected [COLLECTION_WILL_UPDATE_CHILDREN]? (data: CollectionUpdateChildrenEventData<CM>): void;
+  [COLLECTION_WILL_UPDATE_CHILDREN]? (data: CollectionUpdateChildrenEventData<CM>): void;
   // after children change
   [COLLECTION_DID_UPDATE_CHILDREN]? (data: CollectionUpdateChildrenEventData<CM>): void;
   // after one child change
@@ -331,3 +326,23 @@ Attrs
 }
 
 export default Collection;
+
+export function generateCollection<
+MC extends typeof Model,
+CustomEvent = {},
+M extends Model = InstanceType<MC>,
+> (
+  ModelClass: MC
+) {
+  class CustomCollection extends Collection<M, CustomEvent> {
+    static Model = ModelClass
+  }
+
+  return (
+    params: Parameters<CustomCollection['resetChildren']>[0]
+  ) => {
+    const collection = new CustomCollection();
+    collection.resetChildren(params);
+    return collection;
+  }
+}
