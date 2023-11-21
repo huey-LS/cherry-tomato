@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.0.3
+
+### Patch Changes
+
+- c6dce27: 添加 generateCollection 函数，快速的创建临时的无额外功能的 Collection
+
 ## 3.0.2
 
 ### Patch Changes
