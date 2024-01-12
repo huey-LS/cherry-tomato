@@ -68,6 +68,7 @@ export function attribute (
           if (typeof this.get(name) !== 'undefined') {
             return SHOULD_NOT_SET;
           }
+          this.set(name, initialValue);
           return initialValue;
         }
       } as ClassAccessorDecoratorResult<This, Value>;

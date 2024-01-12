@@ -31,19 +31,22 @@ describe('attribute', function () {
   test('should get default attribute success', () => {
     expect(model.count).toBe(1);
     expect(model.text).toBe('a');
+    expect(model.text2).toBe('a');
     expect(model.differentKey).toBe(0);
 
     expect(model2.count).toBe(20);
     expect(model2.text).toBe('b');
+    expect(model2.text2).toBe('b');
   })
 
 
   test('should update count by setter success', () => {
     model.count = 2;
     expect(model.count).toBe(2);
-
     model.text = 'abc';
     expect(model.text).toBe('abc');
+    model.text2 = 'c';
+    expect(model.text2).toBe('c');
   })
 
   test('should attribute update when Instantiate', () => {
