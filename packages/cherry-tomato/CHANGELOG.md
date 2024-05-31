@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.1.0
+
+### Minor Changes
+
+- 9690200: connect 同步和 useCherryTomato 的监听增加 20ms 的节流控制，减少 react 多次重复 render 导致的性能问题
+
 ## 3.0.4
 
 ### Patch Changes
