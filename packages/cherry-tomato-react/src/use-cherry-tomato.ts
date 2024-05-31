@@ -7,7 +7,9 @@ import {
   Model
 } from '@cherry-tomato/core';
 
-import autoObserve, { ObserveOptions } from './auto-observe';
+import autoObserve, {
+  ObserveOptions
+} from './auto-observe';
 
 export default function useCherryTomato (model: Model | null, options: UseCherryTomatoOptions = {}) {
   const [, updateState] = useState<any>();

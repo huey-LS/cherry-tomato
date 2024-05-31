@@ -1,8 +1,14 @@
 
 import {
   Model,
-  Collection
+  Collection,
+  CherryTomatoLifeCycle
 } from '@cherry-tomato/core';
+
+import {
+  throttle,
+  ThrottleParams
+} from './throttle';
 
 interface AutoUpdateEventNameCreator {
   (model: any, key?: string): string[];
@@ -10,22 +16,22 @@ interface AutoUpdateEventNameCreator {
 export type AutoUpdateEvents = string[] | AutoUpdateEventNameCreator;
 
 export interface ObserveOptions {
-  autoUpdateEvents?: AutoUpdateEvents
+  autoUpdateEvents?: AutoUpdateEvents;
+  throttle?: ThrottleParams
 }
 
-export default function (model: Model, callback: () => void, options: ObserveOptions = {}) {
+export default function (
+  model: Model,
+  callback: () => void,
+  options: ObserveOptions = {}
+) {
   let autoUpdateEvents = options.autoUpdateEvents;
   let currentUpdateEvents: string[] = [];
   if (!autoUpdateEvents) {
     if (Collection.isCollection(model)) {
-      currentUpdateEvents = [
-        'modelDidUpdate',
-        'collectionDidUpdateChildren'
-      ]
+      currentUpdateEvents = CherryTomatoLifeCycle.COLLECTION_UPDATE_LIFE_CYCLES;
     } else if (Model.isModel(model)) {
-      currentUpdateEvents = [
-        'modelDidUpdate'
-      ]
+      currentUpdateEvents = CherryTomatoLifeCycle.MODEL_UPDATE_LIFE_CYCLES;
     }
   } else if (typeof autoUpdateEvents === 'function') {
     currentUpdateEvents = autoUpdateEvents(model);
@@ -33,11 +39,16 @@ export default function (model: Model, callback: () => void, options: ObserveOpt
     currentUpdateEvents = autoUpdateEvents;
   }
 
+  const throttleCallback = throttle(
+    callback,
+    options.throttle
+  ).run;
+
   return model.addAllListener((event) => {
     if (
       ~currentUpdateEvents.indexOf(event.type)
     ) {
-      callback();
+      throttleCallback();
     }
   });
 }

@@ -1,12 +1,9 @@
 import Attributes from './attributes';
-import EventEmitter, {
-  Event,
-  TypedEventCallback,
-  EventConfig
-} from './event-emitter';
+import EventEmitter from './event-emitter';
 import {
   MODEL_DID_UPDATE,
-  MODEL_WILL_UPDATE
+  MODEL_WILL_UPDATE,
+  CONNECT_MODEL_DID_UPDATE,
  } from '../constants/life-cycle';
 import { respond } from '../shared/spread';
 import {
@@ -23,6 +20,10 @@ type nextAttributes = Attributes;
 export type CommonModelEventConfig = {
   [MODEL_WILL_UPDATE]: [prevAttributes, nextAttributes];
   [MODEL_DID_UPDATE]: [prevAttributes, nextAttributes];
+  [CONNECT_MODEL_DID_UPDATE]: {
+    key: string;
+    modal: Model;
+  };
 }
 
 export default class Model<

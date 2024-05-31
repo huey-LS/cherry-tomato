@@ -1,12 +1,28 @@
 import {
   MODEL_DID_UPDATE,
+  CONNECT_MODEL_DID_UPDATE,
+  COLLECTION_UPDATE_LIFE_CYCLES
 } from '../../constants/life-cycle';
 
-import Model from '../model';
+import Model, {
+  CommonModelEventConfig
+} from '../model';
 import Collection from '../collection';
+import {
+  throttle
+} from '../../shared/throttle';
 
 interface ConnectOptions<M extends Model = Model, ConnectM extends Model = Model> {
-  sync?: Boolean;
+  sync?: Boolean | {
+    /**
+     * 节流同步
+     */
+    throttle?: boolean;
+  };
+}
+
+const defaultSyncParams = {
+  throttle: false
 }
 
 
@@ -33,16 +49,41 @@ function connectModel<
 
 
   if (options.sync) {
+    const syncParams = {
+      ...defaultSyncParams,
+      ...options.sync
+    };
     let syncing = false;
-    let removeConnectedModelDidUpdateListener = connectedModel.addListener(MODEL_DID_UPDATE, ({ data }) => {
-      if (syncing) return;
-      syncing = true;
-      target.set(key, connectedModel.toJSON())
-      syncing = false;
-    })
+    const connectedModelCallback: Parameters<Model['addAllListener']>[0] = ({ data, type }) => {
+      if (
+        !syncing
+        &&  ~COLLECTION_UPDATE_LIFE_CYCLES.indexOf(type)
 
-    let removeTargetDidUpdateListener = target.addListener(MODEL_DID_UPDATE, ({
-      data: [prevAttributes, nextAttributes]
+      ) {
+        syncing = true;
+        target.set(key, connectedModel.toJSON())
+        syncing = false;
+        target.emit(
+          CONNECT_MODEL_DID_UPDATE,
+          {
+            key,
+            modal: connectedModel
+          }
+        )
+      }
+    }
+
+    let removeConnectedModelDidUpdateListener = connectedModel.addAllListener(
+      syncParams.throttle ? throttle(connectedModelCallback).run : connectedModelCallback
+    );
+
+    const targetModelCallback: Parameters<Model['addListener']>[1] = ({
+      data: [
+        prevAttributes,
+        nextAttributes
+      ]
+    }: {
+      data: CommonModelEventConfig['modelDidUpdate']
     }) => {
       if (
         prevAttributes.get(key) !== nextAttributes.get(key)
@@ -56,7 +97,12 @@ function connectModel<
         }
         syncing = false;
       }
-    });
+    }
+
+    let removeTargetDidUpdateListener = target.addListener(
+      MODEL_DID_UPDATE,
+      syncParams.throttle ? throttle(targetModelCallback).run : targetModelCallback
+    );
 
     let prevRemoveListener = removeListener;
 
