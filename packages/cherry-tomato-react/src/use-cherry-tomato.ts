@@ -11,7 +11,10 @@ import autoObserve, {
   ObserveOptions
 } from './auto-observe';
 
-export default function useCherryTomato (model: Model | null, options: UseCherryTomatoOptions = {}) {
+export default function useCherryTomato (
+  model: Model | null,
+  options: UseCherryTomatoOptions = {}
+) {
   const [, updateState] = useState<any>();
 
   useLayoutEffect(() => {

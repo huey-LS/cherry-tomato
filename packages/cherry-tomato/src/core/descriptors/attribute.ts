@@ -99,7 +99,8 @@ export function attribute (
           if (newValue !== SHOULD_NOT_SET) {
             this.set(name, newValue);
           }
-        }
+        },
+        configurable: true
       };
       context.addInitializer && context.addInitializer(function () {
         if (
