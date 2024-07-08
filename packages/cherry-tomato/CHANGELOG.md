@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.1.1
+
+### Patch Changes
+
+- d4a2434: field 类型装饰设置 configurable:true
+
 ## 3.1.0
 
 ### Minor Changes

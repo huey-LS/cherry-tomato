@@ -1,6 +1,6 @@
 {
   "name": "@cherry-tomato/react",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "",
   "main": "src/index.js",
   "files": [
@@ -30,6 +30,6 @@
     "react": "*"
   },
   "dependencies": {
-    "@cherry-tomato/core": "^3.1.0"
+    "@cherry-tomato/core": "^3.1.1"
   }
 }

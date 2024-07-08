@@ -1,5 +1,13 @@
 # @cherry-tomato/react
 
+## 3.1.1
+
+### Patch Changes
+
+- d4a2434: field 类型装饰设置 configurable:true
+- Updated dependencies [d4a2434]
+  - @cherry-tomato/core@3.1.1
+
 ## 3.1.0
 
 ### Minor Changes
