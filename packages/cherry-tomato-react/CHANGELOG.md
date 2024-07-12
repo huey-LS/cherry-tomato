@@ -1,5 +1,11 @@
 # @cherry-tomato/react
 
+## 3.1.2
+
+### Patch Changes
+
+- f291d21: react 的自动监听节流会立即触发一次，以改善用户输入时的体验
+
 ## 3.1.1
 
 ### Patch Changes
