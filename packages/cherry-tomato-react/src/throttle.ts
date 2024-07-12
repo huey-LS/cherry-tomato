@@ -34,7 +34,7 @@ export function throttle<
   fn: T,
   {
     wait = 20,
-    leading = false,
+    leading = true,
     trailing = true,
   }: ThrottleParams = {}
 ) {
