@@ -1,5 +1,11 @@
 # @cherry-tomato/react
 
+## 3.1.3
+
+### Patch Changes
+
+- 492f8f0: 更新截流作为非默认开启选项
+
 ## 3.1.2
 
 ### Patch Changes
