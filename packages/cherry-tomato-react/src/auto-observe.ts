@@ -39,10 +39,10 @@ export default function (
     currentUpdateEvents = autoUpdateEvents;
   }
 
-  const throttleCallback = throttle(
+  const throttleCallback = options.throttle ? throttle(
     callback,
     options.throttle
-  ).run;
+  ).run : callback;
 
   return model.addAllListener((event) => {
     if (
