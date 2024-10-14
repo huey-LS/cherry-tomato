@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.1.2
+
+### Patch Changes
+
+- 1effa66bb236528c56b275d97ff7a4be8e347386: connect 装饰于于 accessor 时，允许通过 lazy 在第一次访问的时候初始化对象
+
 ## 3.1.1
 
 ### Patch Changes
