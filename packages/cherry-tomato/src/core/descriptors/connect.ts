@@ -12,13 +12,18 @@ import {
   throttle
 } from '../../shared/throttle';
 
-interface ConnectOptions<M extends Model = Model, ConnectM extends Model = Model> {
-  sync?: Boolean | {
+interface ConnectOptions<
+ConnectM extends Model = Model,
+M extends Model = Model> {
+  sync?: boolean | {
     /**
      * 节流同步
      */
     throttle?: boolean;
   };
+  lazy?: {
+    generate: (parent: M) => ConnectM;
+  }
 }
 
 const defaultSyncParams = {
@@ -33,9 +38,8 @@ function connectModel<
   connectedModel: ConnectedM,
   target: M,
   key: string,
-  options: ConnectOptions<M, ConnectedM>
+  options: ConnectOptions<ConnectedM, M>
 ) {
-
   // 设置初始化值
   if (target.get(key)) {
     if (Collection.isCollection(connectedModel)) {
@@ -48,17 +52,23 @@ function connectModel<
   let removeListener = () => {};
 
 
-  if (options.sync) {
+  if (
+    options.sync
+  ) {
     const syncParams = {
       ...defaultSyncParams,
-      ...options.sync
+      ...(
+        typeof options.sync !== 'boolean'
+        ? options.sync
+        : {}
+      )
     };
     let syncing = false;
     const connectedModelCallback: Parameters<Model['addAllListener']>[0] = ({ data, type }) => {
       if (
         !syncing
         &&  ~COLLECTION_UPDATE_LIFE_CYCLES.indexOf(type)
-
+        && connectedModel
       ) {
         syncing = true;
         target.set(key, connectedModel.toJSON())
@@ -126,14 +136,19 @@ function connectModel<
   }
 }
 
-export function connect (
+export function connect<
+Value extends Model = Model,
+Target extends Model = Model,
+> (
   params?: string | {
     name?: string;
-    sync?: boolean;
+    sync?: ConnectOptions<Value, Target>['sync'];
+    lazy?: ConnectOptions<Value, Target>['lazy'];
   }
 ) {
   let name: string = '';
-  let sync = true;
+  let sync: ConnectOptions<Value, Target>['sync'] = true;
+  let lazy: ConnectOptions<Value, Target>['lazy'];
   if (params) {
     if (typeof params === 'string') {
       name = params
@@ -143,25 +158,28 @@ export function connect (
       }
       if (params.sync === false) {
         sync = false;
+      } else if (params.sync) {
+        sync = params.sync
       }
+      lazy = params.lazy;
     }
   }
 
-  function connectDecorator<This extends Model, Value extends Model> (
-    value: ClassAccessorDecoratorTarget<This, Value>,
-    context: ClassAccessorDecoratorContext<This, Value>
-  ): ClassAccessorDecoratorResult<This, Value>;
-  function connectDecorator<This extends Model, Value extends Model> (
+  function connectDecorator (
+    value: ClassAccessorDecoratorTarget<Target, Value>,
+    context: ClassAccessorDecoratorContext<Target, Value>
+  ): ClassAccessorDecoratorResult<Target, Value>;
+  function connectDecorator (
     value: undefined,
-    context: ClassFieldDecoratorContext<This, Value>
+    context: ClassFieldDecoratorContext<Target, Value>
   ): void | ((initialValue: Value) => Value);
-  function connectDecorator<This extends Model, Value extends Model> (
-    value: ClassAccessorDecoratorTarget<This, Value>
+  function connectDecorator (
+    value: ClassAccessorDecoratorTarget<Target, Value>
       | undefined,
-    context: ClassAccessorDecoratorContext<This, Value>
-      | ClassFieldDecoratorContext<This, Value>
+    context: ClassAccessorDecoratorContext<Target, Value>
+      | ClassFieldDecoratorContext<Target, Value>
   ): (
-    ClassAccessorDecoratorResult<This, Value>
+    ClassAccessorDecoratorResult<Target, Value>
     | void
     | ((initialValue: Value) => Value)
   ) {
@@ -178,7 +196,7 @@ export function connect (
     }
 
     const updateConnectedModel = (
-      target: This,
+      target: Target,
       newConnectedModel: undefined | Value,
     ) => {
       const storage: Storage = (target as any)[storageKey] as Storage || {
@@ -192,12 +210,16 @@ export function connect (
       storage.removeConnected();
       storage.connectedModel = newConnectedModel;
       if (newConnectedModel) {
-        storage.removeConnected = connectModel(
+        storage.removeConnected = connectModel<
+          Target,
+          Value
+        >(
           newConnectedModel,
           target,
           name,
           {
-            sync
+            sync,
+            lazy
           }
         );
       } else {
@@ -206,7 +228,7 @@ export function connect (
     }
 
     const initClone = (
-      target: This
+      target: Target
     ) => {
       const storage: Storage = (target as any)[storageKey] as Storage;
       if (storage && storage.initClone) {
@@ -229,11 +251,20 @@ export function connect (
     }
 
     if (context.kind === 'accessor') {
-      let { get, set } = value as ClassAccessorDecoratorTarget<This, Value>;
+      let { get, set } = value as ClassAccessorDecoratorTarget<Target, Value>;
       return {
         get () {
           const storage: Storage = (this as any)[storageKey] as Storage;
-          return storage && storage.connectedModel;
+          let connectedModel = storage && storage.connectedModel;
+          if (
+            lazy
+            && !connectedModel
+          ) {
+            connectedModel = lazy.generate(this);
+            updateConnectedModel(this, connectedModel);
+            initClone(this);
+          }
+          return connectedModel;
         },
         set (newValue) {
           updateConnectedModel(this, newValue);
@@ -245,11 +276,11 @@ export function connect (
           initClone(this);
           return initialValue;
         }
-      } as ClassAccessorDecoratorResult<This, Value>;
+      } as ClassAccessorDecoratorResult<Target, Value>;
     }
 
     if (context.kind === 'field') {
-      return function (this: This, initialValue: Value) {
+      return function (this: Target, initialValue: Value) {
         updateConnectedModel(this, initialValue);
         return initialValue;
       }

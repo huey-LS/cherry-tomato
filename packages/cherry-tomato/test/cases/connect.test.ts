@@ -10,12 +10,41 @@ class ConnectedModel extends Model {
   accessor count = 0;
 }
 
+class LazyModel1 extends Model {
+  type = 1;
+
+  @attribute()
+  accessor count = 1;
+}
+
+class LazyModel2 extends Model {
+  type = 2
+
+  @attribute()
+  accessor count = 2;
+}
+
+
 class InitialModel extends Model {
+  lazyType = 1;
+
   @connect()
   connected = new ConnectedModel();
 
   @connect()
   accessor accessorConnected = new ConnectedModel();
+
+  @connect({
+    lazy: {
+      generate(parent) {
+        if (parent.lazyType === 1) {
+          return new LazyModel1()
+        }
+        return new LazyModel2()
+      },
+    }
+  })
+  accessor lazyConnected!: LazyModel1 | LazyModel2;
 }
 
 
@@ -87,5 +116,45 @@ describe('accessor connect model', function () {
     model.accessorConnected.count = 5;
     expect(clonedModel.accessorConnected.count).toBe(4);
     expect(model.accessorConnected.count).toBe(5);
+  })
+})
+
+describe('accessor lazy model', function () {
+  var model1 = new InitialModel({});
+  model1.lazyType = 1;
+  var model2 = new InitialModel({});
+  model2.lazyType = 2;
+
+  test('should lazy init auto switch by type', () => {
+    expect(model1.lazyType).toBe(1);
+    expect(
+      model1.lazyConnected
+    ).toBeInstanceOf(LazyModel1);
+    expect(
+      model1.lazyConnected
+    ).toBe(model1.lazyConnected);
+    expect(
+      model1.lazyConnected.count
+    ).toBe(1);
+    model1.lazyConnected.count += 2;
+    expect(
+      model1.lazyConnected.count
+    ).toBe(3);
+
+    expect(model2.lazyType).toBe(2);
+    expect(
+      model2.lazyConnected
+    ).toBeInstanceOf(LazyModel2);
+    expect(
+      model2.lazyConnected.count
+    ).toBe(2);
+
+    /**
+     * 修改type暂时不会重新初始化
+     */
+    model1.lazyType = 2
+    expect(
+      model1.lazyConnected
+    ).toBeInstanceOf(LazyModel1);
   })
 })
