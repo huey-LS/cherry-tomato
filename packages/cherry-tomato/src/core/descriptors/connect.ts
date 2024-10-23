@@ -21,6 +21,10 @@ M extends Model = Model> {
      */
     throttle?: boolean;
   };
+  /**
+   * 开启 lazy 可以在第一次访问的时候才初始化，可以减少一些消耗
+   * 需要配合 accessor 装饰器使用
+   */
   lazy?: {
     generate: (parent: M) => ConnectM;
   }
