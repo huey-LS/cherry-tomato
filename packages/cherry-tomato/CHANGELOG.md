@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.1.3
+
+### Patch Changes
+
+- 5bc302b: event-emitter 每次事件回调使用 try-catch 防止意外退出
+
 ## 3.1.2
 
 ### Patch Changes
