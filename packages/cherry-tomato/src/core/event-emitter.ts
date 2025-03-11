@@ -96,12 +96,20 @@ EventsConfig = CE & CommonEventConfig
     let events = this._events[type];
     if (events) {
       events.forEach((callback) => {
-        callback.call(this, event);
+        try {
+          callback.call(this, event);
+         } catch (e) {
+           console.error(e);
+         }
       })
     }
 
     this._all_events.forEach((callback) => {
-      callback.call(this, event);
+      try {
+       callback.call(this, event);
+      } catch (e) {
+        console.error(e);
+      }
     })
   }
 
