@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.1.4
+
+### Patch Changes
+
+- 238d1e9: connect 支持 void 和 null 类型
+
 ## 3.1.3
 
 ### Patch Changes
