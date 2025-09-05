@@ -45,6 +45,12 @@ class InitialModel extends Model {
     }
   })
   accessor lazyConnected!: LazyModel1 | LazyModel2;
+
+  @connect()
+  accessor modelOrVoid: ConnectedModel | undefined;
+
+  @connect()
+  accessor modelOrNull: ConnectedModel | null = null;
 }
 
 
@@ -156,5 +162,43 @@ describe('accessor lazy model', function () {
     expect(
       model1.lazyConnected
     ).toBeInstanceOf(LazyModel1);
+  })
+})
+
+describe('accessor model or void', function () {
+  var model = new InitialModel({});
+
+  test('should init model or void success', () => {
+    expect(model.modelOrVoid).toBeUndefined();
+  })
+
+  test('should set model or void success', () => {
+    model.modelOrVoid = new ConnectedModel({ count: 1 });
+    expect(model.modelOrVoid).toBeInstanceOf(ConnectedModel);
+    expect(model.modelOrVoid.count).toBe(1);
+  })
+
+  test('should set void success', () => {
+    model.modelOrVoid = undefined;
+    expect(model.modelOrVoid).toBeUndefined();
+  })
+})
+
+describe('accessor model or null', function () {
+  var model = new InitialModel({});
+
+  test('should init model or null success', () => {
+    expect(model.modelOrNull).toBeNull();
+  })
+
+  test('should set model or null success', () => {
+    model.modelOrNull = new ConnectedModel({ count: 1 });
+    expect(model.modelOrNull).toBeInstanceOf(ConnectedModel);
+    expect(model.modelOrNull.count).toBe(1);
+  })
+
+  test('should set null success', () => {
+    model.modelOrNull = null;
+    expect(model.modelOrNull).toBeNull();
   })
 })

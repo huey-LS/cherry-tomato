@@ -12,8 +12,10 @@ import {
   throttle
 } from '../../shared/throttle';
 
-interface ConnectOptions<
-ConnectM extends Model = Model,
+export type WillConnectChildM = Model | undefined | null;
+
+export interface ConnectOptions<
+ConnectM extends WillConnectChildM = Model,
 M extends Model = Model> {
   sync?: boolean | {
     /**
@@ -37,7 +39,7 @@ const defaultSyncParams = {
 
 function connectModel<
   M extends Model = Model,
-  ConnectedM extends Model = Model
+  ConnectedM extends WillConnectChildM = Model
 > (
   connectedModel: ConnectedM,
   target: M,
@@ -87,7 +89,7 @@ function connectModel<
       }
     }
 
-    let removeConnectedModelDidUpdateListener = connectedModel.addAllListener(
+    let removeConnectedModelDidUpdateListener = connectedModel?.addAllListener(
       syncParams.throttle ? throttle(connectedModelCallback).run : connectedModelCallback
     );
 
@@ -121,7 +123,7 @@ function connectModel<
     let prevRemoveListener = removeListener;
 
     removeListener = () => {
-      removeConnectedModelDidUpdateListener();
+      removeConnectedModelDidUpdateListener?.();
       removeTargetDidUpdateListener();
       prevRemoveListener();
     }
@@ -131,7 +133,7 @@ function connectModel<
     removeListener();
   });
 
-  connectedModel.addListener('willDestroy', () => {
+  connectedModel?.addListener('willDestroy', () => {
     removeListener();
   })
 
@@ -141,7 +143,7 @@ function connectModel<
 }
 
 export function connect<
-Value extends Model = Model,
+Value extends WillConnectChildM = Model,
 Target extends Model = Model,
 > (
   params?: string | {
