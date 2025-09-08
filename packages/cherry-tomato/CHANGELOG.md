@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.1.5
+
+### Patch Changes
+
+- 4bd92eb: connect 响应子节点的 connectDidUpdate
+
 ## 3.1.4
 
 ### Patch Changes
