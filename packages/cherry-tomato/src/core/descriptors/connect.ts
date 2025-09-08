@@ -127,6 +127,31 @@ function connectModel<
       removeTargetDidUpdateListener();
       prevRemoveListener();
     }
+  } else {
+    const connectedModelCallback: Parameters<Model['addAllListener']>[0] = ({ data, type }) => {
+      if (
+         ~COLLECTION_UPDATE_LIFE_CYCLES.indexOf(type)
+        && connectedModel
+      ) {
+        target.emit(
+          CONNECT_MODEL_DID_UPDATE,
+          {
+            key,
+            modal: connectedModel
+          }
+        )
+      }
+    };
+
+    let removeConnectedModelDidUpdateListener = connectedModel?.addAllListener(
+      connectedModelCallback
+    );
+
+    let prevRemoveListener = removeListener;
+    removeListener = () => {
+      removeConnectedModelDidUpdateListener?.();
+      prevRemoveListener();
+    }
   }
 
   target.addListener('willDestroy', () => {

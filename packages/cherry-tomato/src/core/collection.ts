@@ -3,10 +3,10 @@ import {
   Event
 } from './event-emitter';
 import {
-  MODEL_DID_UPDATE,
   COLLECTION_WILL_UPDATE_CHILDREN,
   COLLECTION_DID_UPDATE_CHILDREN,
-  COLLECTION_CHILD_DID_UPDATE
+  COLLECTION_CHILD_DID_UPDATE,
+  COLLECTION_UPDATE_LIFE_CYCLES
 } from '../constants/life-cycle';
 import { respond } from '../shared/spread';
 
@@ -65,11 +65,7 @@ Attrs
 
   _childListener = (event: Event) => {
     if (
-      ~[
-        MODEL_DID_UPDATE,
-        COLLECTION_CHILD_DID_UPDATE,
-        COLLECTION_DID_UPDATE_CHILDREN
-      ].indexOf(event.type)
+      ~COLLECTION_UPDATE_LIFE_CYCLES.indexOf(event.type)
     ) {
       respond(
         COLLECTION_CHILD_DID_UPDATE,
