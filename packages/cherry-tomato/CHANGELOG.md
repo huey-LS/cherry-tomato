@@ -1,5 +1,11 @@
 # @cherry-tomato/core
 
+## 3.2.0
+
+### Minor Changes
+
+- 2211fa5: connect 装饰器支持自定义 sync 转换函数
+
 ## 3.1.5
 
 ### Patch Changes
