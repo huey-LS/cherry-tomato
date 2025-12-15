@@ -5,8 +5,11 @@ import {
 } from '../../constants/life-cycle';
 
 import Model, {
-  CommonModelEventConfig
+  CommonModelEventConfig,
 } from '../model';
+import type {
+  Event
+} from '../event-emitter';
 import Collection from '../collection';
 import {
   throttle
@@ -14,45 +17,149 @@ import {
 
 export type WillConnectChildM = Model | undefined | null;
 
-export interface ConnectOptions<
-ConnectM extends WillConnectChildM = Model,
+
+type ShouldSyncToConnected<
+ConnectedM extends WillConnectChildM = WillConnectChildM,
+M extends Model = Model> = (
+  event: Event,
+  connectedModel: ConnectedM,
+  target: M,
+  key: string
+) => boolean;
+
+type TransformToConnected<
+ConnectedM extends WillConnectChildM = WillConnectChildM,
+M extends Model = Model> = (connectedModel: ConnectedM, target: M, key: string) => boolean;
+
+type ShouldSyncToTarget<
+ConnectedM extends WillConnectChildM = WillConnectChildM,
+M extends Model = Model> = (
+    event: Event,
+    connectedModel: ConnectedM,
+    target: M,
+    key: string
+  ) => boolean;
+type TransformToTarget<
+ConnectedM extends WillConnectChildM = WillConnectChildM,
+M extends Model = Model> = (connectedModel: ConnectedM, target: M, key: string) => boolean;
+
+export interface SyncParams<
+ConnectedM extends WillConnectChildM = WillConnectChildM,
 M extends Model = Model> {
-  sync?: boolean | {
-    /**
-     * 节流同步
-     */
-    throttle?: boolean;
-  };
+  /**
+   * 节流同步
+   */
+  shouldSyncToConnected?: ShouldSyncToConnected<ConnectedM, M>;
+  transformToConnected?: TransformToConnected<ConnectedM, M>,
+  throttle?: boolean;
+  shouldSyncToTarget?: ShouldSyncToTarget<ConnectedM, M>;
+  transformToTarget?: TransformToTarget<ConnectedM, M>;
+}
+
+export interface ConnectOptions<
+ConnectedM extends WillConnectChildM = WillConnectChildM,
+M extends Model = Model> {
+  sync?: boolean | SyncParams<ConnectedM, M>;
   /**
    * 开启 lazy 可以在第一次访问的时候才初始化，可以减少一些消耗
    * 需要配合 accessor 装饰器使用
    */
   lazy?: {
-    generate: (parent: M) => ConnectM;
+    generate: (parent: M) => ConnectedM;
   }
 }
 
-const defaultSyncParams = {
-  throttle: false
+
+const defaultShouldSyncToConnected: ShouldSyncToConnected = (
+  event,
+  connectedModel,
+  target,
+  key
+) => {
+  if (event.type !== MODEL_DID_UPDATE) {
+    return false;
+  }
+  const { data } = event;
+  const [prevAttributes, nextAttributes] = data
+  return prevAttributes.get(key) !== nextAttributes.get(key);
+}
+
+const defaultTransformToConnected: TransformToConnected = (
+  connectedModel,
+  target,
+  key
+) => {
+  if (Collection.isCollection(connectedModel)) {
+    connectedModel.resetChildren(target.get(key))
+    return true;
+  }
+  if (Model.isModel(connectedModel)) {
+    connectedModel.reset(target.get(key));
+    return true;
+  }
+  return false;
+}
+
+const defaultShouldSyncToTarget: ShouldSyncToTarget = (
+  event
+) => {
+  return !!(~COLLECTION_UPDATE_LIFE_CYCLES.indexOf(event.type));
+}
+
+const defaultTransformToTarget: TransformToTarget = (
+  connectedModel,
+  target,
+  key
+) => {
+  if (!connectedModel) {
+    return false;
+  }
+  target.set(key, connectedModel.toJSON())
+  return true;
+}
+
+export const defaultConnectSyncParams: SyncParams = {
+  throttle: false,
+  shouldSyncToConnected: defaultShouldSyncToConnected,
+  transformToConnected: defaultTransformToConnected,
+  shouldSyncToTarget: defaultShouldSyncToTarget,
+  transformToTarget: defaultTransformToTarget
 }
 
 
 function connectModel<
   M extends Model = Model,
-  ConnectedM extends WillConnectChildM = Model
+  ConnectedM extends WillConnectChildM = WillConnectChildM
 > (
   connectedModel: ConnectedM,
   target: M,
   key: string,
   options: ConnectOptions<ConnectedM, M>
 ) {
-  // 设置初始化值
-  if (target.get(key)) {
-    if (Collection.isCollection(connectedModel)) {
-      connectedModel.resetChildren(target.get(key))
-    } else if (Model.isModel(connectedModel)) {
-      connectedModel.reset(target.get(key))
+  let transformToConnected: TransformToConnected<ConnectedM, M> = defaultTransformToConnected;
+  let shouldSyncToConnected: ShouldSyncToConnected<ConnectedM, M> = defaultShouldSyncToConnected;
+
+  let transformToTarget: TransformToTarget<ConnectedM, M> = defaultTransformToTarget;
+  let shouldSyncToTarget: ShouldSyncToTarget<ConnectedM, M> = defaultShouldSyncToTarget;
+
+  if (typeof options.sync === 'object') {
+    if (options.sync.transformToConnected) {
+      transformToConnected = options.sync.transformToConnected;
     }
+    if (options.sync.shouldSyncToConnected) {
+      shouldSyncToConnected = options.sync.shouldSyncToConnected;
+    }
+    if (options.sync.transformToTarget) {
+      transformToTarget = options.sync.transformToTarget;
+    }
+    if (options.sync.shouldSyncToTarget) {
+      shouldSyncToTarget = options.sync.shouldSyncToTarget;
+    }
+  }
+
+  // 设置初始化值
+  if (target.get(key) && connectedModel) {
+    transformToConnected(connectedModel, target, key);
   }
 
   let removeListener = () => {};
@@ -62,7 +169,7 @@ function connectModel<
     options.sync
   ) {
     const syncParams = {
-      ...defaultSyncParams,
+      ...defaultConnectSyncParams,
       ...(
         typeof options.sync !== 'boolean'
         ? options.sync
@@ -70,22 +177,23 @@ function connectModel<
       )
     };
     let syncing = false;
-    const connectedModelCallback: Parameters<Model['addAllListener']>[0] = ({ data, type }) => {
+    const connectedModelCallback: Parameters<Model['addAllListener']>[0] = (event) => {
       if (
         !syncing
-        &&  ~COLLECTION_UPDATE_LIFE_CYCLES.indexOf(type)
-        && connectedModel
+        && shouldSyncToTarget(event, connectedModel, target, key)
       ) {
         syncing = true;
-        target.set(key, connectedModel.toJSON())
+        const changed = transformToTarget(connectedModel, target, key);
         syncing = false;
-        target.emit(
-          CONNECT_MODEL_DID_UPDATE,
-          {
-            key,
-            modal: connectedModel
-          }
-        )
+        if (changed && connectedModel) {
+          target.emit(
+            CONNECT_MODEL_DID_UPDATE,
+            {
+              key,
+              modal: connectedModel
+            }
+          )
+        }
       }
     }
 
@@ -93,30 +201,18 @@ function connectModel<
       syncParams.throttle ? throttle(connectedModelCallback).run : connectedModelCallback
     );
 
-    const targetModelCallback: Parameters<Model['addListener']>[1] = ({
-      data: [
-        prevAttributes,
-        nextAttributes
-      ]
-    }: {
-      data: CommonModelEventConfig['modelDidUpdate']
-    }) => {
+    const targetModelCallback: Parameters<Model['addAllListener']>[0] = (event) => {
       if (
-        prevAttributes.get(key) !== nextAttributes.get(key)
+        !syncing
+        && shouldSyncToConnected(event, connectedModel, target, key)
       ) {
-        if (syncing) return;
         syncing = true;
-        if (Collection.isCollection(connectedModel)) {
-          connectedModel.resetChildren(nextAttributes.get(key))
-        } else if (Model.isModel(connectedModel)) {
-          connectedModel.set(nextAttributes.get(key))
-        }
+        transformToConnected(connectedModel, target, key);
         syncing = false;
       }
     }
 
-    let removeTargetDidUpdateListener = target.addListener(
-      MODEL_DID_UPDATE,
+    let removeTargetDidUpdateListener = target.addAllListener(
       syncParams.throttle ? throttle(targetModelCallback).run : targetModelCallback
     );
 
@@ -128,9 +224,9 @@ function connectModel<
       prevRemoveListener();
     }
   } else {
-    const connectedModelCallback: Parameters<Model['addAllListener']>[0] = ({ data, type }) => {
+    const connectedModelCallback: Parameters<Model['addAllListener']>[0] = (event) => {
       if (
-         ~COLLECTION_UPDATE_LIFE_CYCLES.indexOf(type)
+        shouldSyncToConnected(event, connectedModel, target, key)
         && connectedModel
       ) {
         target.emit(

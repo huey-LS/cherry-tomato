@@ -8,7 +8,7 @@ import EventEmitter, {
   TypedEventCallback
 } from './core/event-emitter';
 import * as KeyCreators from './core/key-creators';
-import { connect } from './core/descriptors/connect';
+import { connect, defaultConnectSyncParams } from './core/descriptors/connect';
 import { attribute } from './core/descriptors/attribute';
 import * as CherryTomatoLifeCycle from './constants/life-cycle';
 
@@ -23,6 +23,7 @@ export {
   TypedEventCallback,
   KeyCreators,
   connect,
+  defaultConnectSyncParams,
   attribute,
   CherryTomatoLifeCycle
 }

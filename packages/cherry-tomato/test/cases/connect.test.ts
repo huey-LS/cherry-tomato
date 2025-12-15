@@ -1,7 +1,9 @@
 import {
   Model,
   connect,
-  attribute
+  attribute,
+  Attributes,
+  CherryTomatoLifeCycle
 } from '../../src/index';
 
 
@@ -51,6 +53,66 @@ class InitialModel extends Model {
 
   @connect()
   accessor modelOrNull: ConnectedModel | null = null;
+
+
+  enableSyncCustom = true;
+
+  @connect({
+    name: 'customTransformCount',
+    sync: {
+      shouldSyncToConnected: (
+        event,
+        connectedMode,
+        targetMode,
+        key
+      ) => {
+        if (
+          event.type !== CherryTomatoLifeCycle.MODEL_DID_UPDATE
+          || !targetMode.enableSyncCustom
+        ) {
+          return false;
+        }
+        const { data } = event;
+        const [
+          prevAttributes,
+          nextAttributes
+        ] = data;
+        return prevAttributes.get(key) !== nextAttributes.get(key);
+      },
+      transformToConnected: (
+        connectedModal,
+        targetModal,
+        key
+      ) => {
+        connectedModal.set('count', targetModal.get(key))
+        return true;
+      },
+
+      shouldSyncToTarget: (
+        event,
+        connectedMode,
+        targetMode,
+        key
+      ) => {
+        if (
+          !!(~CherryTomatoLifeCycle.COLLECTION_UPDATE_LIFE_CYCLES.indexOf(event.type))
+          && targetMode.enableSyncCustom
+        ) {
+          return true;
+        }
+        return false;
+      },
+      transformToTarget: (
+        connectedModal,
+        targetModal,
+        key
+      ) => {
+        targetModal.set(key, connectedModal.count);
+        return true;
+      },
+    }
+  })
+  accessor customTransformConnectModel = new ConnectedModel();
 }
 
 
@@ -201,4 +263,43 @@ describe('accessor model or null', function () {
     model.modelOrNull = null;
     expect(model.modelOrNull).toBeNull();
   })
+})
+
+describe('custom transform connect', function () {
+  var model = new InitialModel({
+    customTransformCount: 1
+  });
+
+  test('should init data success', () => {
+    expect(model.get('customTransformCount')).toBe(1);
+    expect(model.customTransformConnectModel.count).toBe(1);
+  })
+
+  test('should auto update after model update success', () => {
+    model.enableSyncCustom = true;
+    model.set('customTransformCount', 2)
+    expect(model.get('customTransformCount')).toBe(2);
+    expect(model.customTransformConnectModel.count).toBe(2);
+  });
+
+  test('should not update by shouldSyncToConnected', () => {
+    model.enableSyncCustom = false;
+    model.set('customTransformCount', 3)
+    expect(model.get('customTransformCount')).toBe(3);
+    expect(model.customTransformConnectModel.count).toBe(2);
+  });
+
+  test('should auto update after connectedModel update success', () => {
+    model.enableSyncCustom = true;
+    model.customTransformConnectModel.count = 4;
+    expect(model.customTransformConnectModel.count).toBe(4);
+    expect(model.get('customTransformCount')).toBe(4);
+  });
+
+  test('should not update by shouldSyncToTarget', () => {
+    model.enableSyncCustom = false;
+    model.set('customTransformCount', 5)
+    expect(model.get('customTransformCount')).toBe(5);
+    expect(model.customTransformConnectModel.count).toBe(4);
+  });
 })

@@ -7,8 +7,8 @@
     "setup": "pnpm install",
     "changeset": "changeset",
     "version": "changeset version",
-    "build": "pnpm run build -r",
-    "test": "pnpm test -r"
+    "build": "pnpm -r run build",
+    "test": "pnpm -r test"
   },
   "author": "huey.LS",
   "license": "MIT",
